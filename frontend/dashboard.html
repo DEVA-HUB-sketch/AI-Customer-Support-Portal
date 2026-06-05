@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeskFlow AI — Customer Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+:root {
+  --bg:         #0a0a0f;
+  --bg2:        #0f0f1a;
+  --bg3:        #13131f;
+  --surface:    rgba(255,255,255,0.03);
+  --surface2:   rgba(255,255,255,0.07);
+  --border:     rgba(255,255,255,0.08);
+  --border2:    rgba(255,255,255,0.14);
+  --text:       #f0f0ff;
+  --text2:      #9090b0;
+  --text3:      #5a5a7a;
+  --accent:     #6c63ff;
+  --accent-glow: rgba(108,99,255,0.25);
+  --radius:     16px;
+  --radius-sm:  10px;
+  --font:       'Plus Jakarta Sans', sans-serif;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+  --green:      #22d3a5;
+  --pink:       #f472b6;
+  --orange:     #fb923c;
+  --blue:       #38bdf8;
+}
+[data-theme="light"] {
+  --bg:       #f8f8ff;
+  --bg2:      #f0f0fa;
+  --bg3:      #e8e8f5;
+  --surface:  rgba(0,0,0,0.03);
+  --surface2: rgba(0,0,0,0.06);
+  --border:   rgba(0,0,0,0.08);
+  --border2:  rgba(0,0,0,0.12);
+  --text:     #0a0a1a;
+  --text2:    #505070;
+  --text3:    #8080a0;
+  --accent-glow: rgba(108,99,255,0.12);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+body{
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+    display:flex;
+    cursor:none;
+    transition:background var(--transition), color var(--transition);
+}
+
+#cursor{position:fixed;width:12px;height:12px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,background 0.2s;mix-blend-mode:difference}
+#cursor-trail{position:fixed;width:36px;height:36px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform 0.1s ease;opacity:0.4}
+
+/* Sidebar */
+aside{
+    width:260px;
+    background:var(--bg2);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:30px 20px;
+    z-index:100;
+}
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:20px;
+    font-weight:800;
+    margin-bottom:40px;
+}
+.brand .logo-icon{
+    width:36px;
+    height:36px;
+    background:linear-gradient(135deg,var(--accent),#a78bfa);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+}
+nav{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    flex:1;
+}
+.nav-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 16px;
+    border-radius:var(--radius-sm);
+    color:var(--text2);
+    text-decoration:none;
+    font-weight:600;
+    font-size:14px;
+    transition:all var(--transition);
+    cursor:none;
+}
+.nav-item:hover, .nav-item.active{
+    background:var(--surface2);
+    color:var(--text);
+    box-shadow:inset 0 0 10px rgba(255,255,255,0.01);
+}
+.nav-item.active{
+    border:1px solid var(--border);
+    color:var(--accent);
+}
+.nav-item i{font-size:18px;}
+
+/* Main Panel */
+main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+}
+header{
+    height:70px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 40px;
+}
+.user-profile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.avatar{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:var(--accent);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+}
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+.btn-toggle{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:none;
+    transition:all var(--transition);
+}
+.btn-toggle:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+    transform:rotate(15deg);
+}
+
+.content-area{
+    flex:1;
+    padding:40px;
+    overflow-y:auto;
+}
+
+.panel{
+    display:none;
+    animation:fadeIn 0.4s ease both;
+}
+.panel.active{
+    display:block;
+}
+
+h1{font-weight:800;letter-spacing:-1px;margin-bottom:6px;}
+.lead{color:var(--text2);margin-bottom:30px;font-size:15px;}
+
+/* Grid / Cards */
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    margin-bottom:35px;
+}
+.stat-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+.stat-card i{
+    width:48px;
+    height:48px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+.sc-blue{background:rgba(56,189,248,0.1);color:var(--blue);}
+.sc-green{background:rgba(34,211,165,0.1);color:var(--green);}
+.sc-orange{background:rgba(251,146,60,0.1);color:var(--orange);}
+.stat-num{font-size:24px;font-weight:800;}
+.stat-label{font-size:12px;color:var(--text2);font-weight:600;}
+
+/* Tickets List */
+.ticket-list{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+.glass-card{
+    background:rgba(255,255,255,0.02);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    transition:all var(--transition);
+}
+.glass-card:hover{
+    border-color:var(--border2);
+    transform:translateY(-2px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.2);
+}
+.ticket-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:12px;
+}
+.badge{
+    padding:4px 10px;
+    border-radius:6px;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+.badge-status-open{background:rgba(56,189,248,0.15);color:var(--blue);border:1px solid rgba(56,189,248,0.3);}
+.badge-status-progress{background:rgba(251,146,60,0.15);color:var(--orange);border:1px solid rgba(251,146,60,0.3);}
+.badge-status-resolved{background:rgba(34,211,165,0.15);color:var(--green);border:1px solid rgba(34,211,165,0.3);}
+.ticket-title{font-size:16px;font-weight:700;margin-bottom:8px;}
+.ticket-desc{font-size:14px;color:var(--text2);line-height:1.5;margin-bottom:15px;}
+.ticket-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--text3);
+    border-top:1px solid var(--border);
+    padding-top:14px;
+}
+.tf-meta{display:flex;gap:15px;}
+.tf-meta span{display:flex;align-items:center;gap:6px;}
+.tf-meta span i{font-size:14px;}
+
+.btn-sm{
+    padding:6px 12px;
+    border-radius:8px;
+    background:var(--accent);
+    color:white;
+    border:none;
+    cursor:none;
+    font-size:12px;
+    font-weight:600;
+}
+.btn-sm:hover{opacity:0.9;}
+
+/* Form Styles */
+.form-group{
+    margin-bottom:20px;
+}
+label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:8px;
+    color:var(--text);
+}
+input[type="text"],textarea,select{
+    width:100%;
+    padding:12px 16px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    background:var(--surface);
+    color:var(--text);
+    font-size:14px;
+    outline:none;
+    transition:all var(--transition);
+}
+input[type="text"]:focus,textarea:focus,select:focus{
+    border-color:var(--accent);
+    background:var(--surface2);
+    box-shadow:0 0 16px var(--accent-glow);
+}
+textarea{resize:vertical;min-height:120px;}
+.ai-helper-toast{
+    background:rgba(108,99,255,0.06);
+    border:1px solid rgba(108,99,255,0.2);
+    padding:12px 16px;
+    border-radius:10px;
+    margin-top:10px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--text);
+}
+.ai-helper-toast i{color:var(--accent);font-size:18px;}
+
+/* Ticket Workspace (Expanded Conversation / Timelines) */
+.workspace-container{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:30px;
+    margin-top:20px;
+}
+.chat-window{
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    display:flex;
+    flex-direction:column;
+    height:500px;
+}
+.chat-header{
+    padding:15px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.chat-messages{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+.chat-msg{
+    display:flex;
+    flex-direction:column;
+    max-width:75%;
+}
+.chat-msg.customer{
+    align-self:flex-end;
+    align-items:flex-end;
+}
+.chat-msg.agent{
+    align-self:flex-start;
+    align-items:flex-start;
+}
+.chat-bubble{
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.5;
+}
+.chat-msg.customer .chat-bubble{
+    background:var(--accent);
+    color:white;
+    border-bottom-right-radius:2px;
+}
+.chat-msg.agent .chat-bubble{
+    background:var(--surface2);
+    color:var(--text);
+    border-bottom-left-radius:2px;
+}
+.chat-time{
+    font-size:10px;
+    color:var(--text3);
+    margin-top:4px;
+}
+.chat-input-row{
+    padding:15px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:10px;
+}
+.timeline{
+    border-left:2px solid var(--border);
+    margin-left:10px;
+    padding-left:20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+.timeline-item{
+    position:relative;
+}
+.timeline-item::before{
+    content:'';
+    position:absolute;
+    left:-27px;
+    top:4px;
+    width:12px;
+    height:12px;
+    background:var(--accent);
+    border-radius:50%;
+    border:2px solid var(--bg);
+}
+.timeline-title{font-size:13px;font-weight:700;}
+.timeline-desc{font-size:11px;color:var(--text2);margin-top:2px;}
+.timeline-time{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* Feedback panel */
+.feedback-box {
+  background:rgba(34,211,165,0.06);
+  border:1px solid rgba(34,211,165,0.25);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:20px;
+}
+.stars {
+  display:flex;
+  gap:10px;
+  margin:10px 0;
+}
+.stars i {
+  font-size:24px;
+  color:var(--text3);
+  cursor:pointer;
+  transition:color 0.2s;
+}
+.stars i.selected {
+  color:#f59e0b;
+}
+
+/* Floating Chatbot */
+#chatbot-btn{
+    position:fixed;
+    bottom:28px;
+    right:28px;
+    z-index:900;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    border:none;
+    color:#fff;
+    font-size:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 30px rgba(108,99,255,0.5);
+    cursor:none;
+}
+#chatbot-panel{
+    position:fixed;
+    bottom:100px;
+    right:28px;
+    z-index:900;
+    width:360px;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    overflow:hidden;
+    display:none;
+    flex-direction:column;
+}
+.cb-header{
+    padding:16px 18px;
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:white;
+}
+.cb-messages{
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    height:260px;
+    overflow-y:auto;
+}
+.cb-input-row{
+    padding:12px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:8px;
+}
+
+/* KB Help Grid */
+.kb-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+    margin-top:20px;
+}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<!-- Sidebar -->
+<aside>
+    <div class="brand">
+        <div class="logo-icon"><i class="ti ti-headset"></i></div>
+        <span>DeskFlow<span style="color:var(--accent)">AI</span></span>
+    </div>
+    <nav>
+        <a href="#" class="nav-item active" onclick="switchPanel('dashboard', this)"><i class="ti ti-layout-dashboard"></i> My Dashboard</a>
+        <a href="#" class="nav-item" onclick="switchPanel('create-ticket', this)"><i class="ti ti-ticket"></i> Submit Ticket</a>
+        <a href="#" class="nav-item" onclick="switchPanel('kb', this)"><i class="ti ti-books"></i> Help Center</a>
+        <a href="profile.html" class="nav-item"><i class="ti ti-settings"></i> Profile Settings</a>
+    </nav>
+    <a href="#" class="nav-item" onclick="logout()"><i class="ti ti-logout"></i> Logout</a>
+</aside>
+
+<!-- Main Workspace -->
+<main>
+    <header>
+        <div class="user-profile">
+            <div class="avatar" id="user-avatar">U</div>
+            <div>
+                <h4 style="font-weight:700;" id="user-name">Loading...</h4>
+                <p style="font-size:11px;color:var(--text2);">Customer Account</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-toggle" onclick="toggleTheme()"><i class="ti ti-sun" id="theme-icon"></i></button>
+        </div>
+    </header>
+
+    <div class="content-area">
+        <!-- Panel 1: Dashboard Overview -->
+        <div id="panel-dashboard" class="panel active">
+            <h1>Workspace Overview</h1>
+            <p class="lead">Track support progress, read updates, and communicate with agents</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="ti ti-ticket sc-blue"></i>
+                    <div>
+                        <div class="stat-num" id="stat-total">0</div>
+                        <div class="stat-label">Total Tickets</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="ti ti-loader sc-orange"></i>
+                    <div>
+                        <div class="stat-num" id="stat-pending">0</div>
+                        <div class="stat-label">Pending Response</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="ti ti-circle-check sc-green"></i>
+                    <div>
+                        <div class="stat-num" id="stat-resolved">0</div>
+                        <div class="stat-label">Resolved Tickets</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="font-weight:800;margin-bottom:15px;">Your Support Tickets</h2>
+            <div class="ticket-list" id="tickets-container">
+                <!-- Loaded Dynamically -->
+            </div>
+        </div>
+
+        <!-- Panel 2: Submit Ticket -->
+        <div id="panel-create-ticket" class="panel">
+            <h1>Submit Support Ticket</h1>
+            <p class="lead">Describe your issue. Zia AI will automatically categorize and prioritize it.</p>
+
+            <div class="glass-card" style="max-width:700px;">
+                <div class="form-group">
+                    <label for="ticket-subject">Ticket Subject</label>
+                    <input type="text" id="ticket-subject" placeholder="e.g. Invoicing dispute for last month subscription" oninput="predictCategory()">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticket-priority">Preferred Priority</label>
+                    <select id="ticket-priority">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ticket-desc">Problem Description</label>
+                    <textarea id="ticket-desc" placeholder="Describe the problem in detail. Include any console logs or exact details..." oninput="predictCategory()"></textarea>
+                </div>
+
+                <div class="ai-helper-toast" id="ai-toast" style="display:none;">
+                    <i class="ti ti-sparkles"></i>
+                    <div>
+                        <strong>Zia AI Assistant:</strong> Auto-categorizing as <span id="ai-pred-cat" style="color:var(--accent);font-weight:700;">General</span> and Sentiment feels <span id="ai-pred-sent" style="font-weight:700;">Neutral</span>.
+                    </div>
+                </div>
+
+                <button class="btn signup-btn" onclick="submitTicket()" style="margin-top:20px;width:auto;padding:12px 30px;">
+                    <i class="ti ti-send"></i> Submit Support Request
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel 3: Help Center (Knowledge Base) -->
+        <div id="panel-kb" class="panel">
+            <h1>Help Center & FAQs</h1>
+            <p class="lead">Search documentation or browse categories for instantaneous resolutions</p>
+
+            <div class="form-group" style="display:flex;gap:10px;max-width:600px;">
+                <input type="text" id="kb-search" placeholder="Search for questions (e.g. password, integrations...)" oninput="loadArticles()">
+                <button class="btn signup-btn" style="width:auto;padding:0 24px;"><i class="ti ti-search"></i></button>
+            </div>
+
+            <div class="kb-grid" id="kb-articles">
+                <!-- Articles dynamically loaded -->
+            </div>
+        </div>
+
+        <!-- Panel 4: Ticket Detail Workspace -->
+        <div id="panel-ticket-detail" class="panel">
+            <button class="btn secondary-btn" onclick="switchPanel('dashboard')" style="width:auto;padding:8px 18px;margin-bottom:20px;">
+                <i class="ti ti-arrow-left"></i> Back to List
+            </button>
+            
+            <h1 id="det-subject">Ticket Subject</h1>
+            <div style="display:flex;gap:10px;margin-bottom:30px;flex-wrap:wrap;">
+                <span class="badge" id="det-status">Open</span>
+                <span class="badge" id="det-priority" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);">High Priority</span>
+                <span class="badge" id="det-category" style="background:rgba(108,99,255,0.1);color:var(--accent);border:1px solid rgba(108,99,255,0.2);">Billing</span>
+                <span class="badge" id="det-sentiment" style="background:rgba(244,114,182,0.15);color:var(--pink);">Negative Sentiment</span>
+            </div>
+
+            <div class="feedback-box" id="feedback-box" style="display:none;">
+              <h3 style="color:var(--green)"><i class="ti ti-award"></i> Support Ticket Resolved!</h3>
+              <p style="font-size:13px;color:var(--text2);margin-top:2px;">Please rate your service and share review comments.</p>
+              <div class="stars" id="csat-stars">
+                <i class="ti ti-star" onclick="rateCSAT(1)"></i>
+                <i class="ti ti-star" onclick="rateCSAT(2)"></i>
+                <i class="ti ti-star" onclick="rateCSAT(3)"></i>
+                <i class="ti ti-star" onclick="rateCSAT(4)"></i>
+                <i class="ti ti-star" onclick="rateCSAT(5)"></i>
+              </div>
+              <textarea id="csat-comment" placeholder="Write feedback comments..." style="margin-top:10px;"></textarea>
+              <button class="btn signup-btn" onclick="submitFeedback()" style="width:auto;padding:8px 20px;background:var(--green);box-shadow:none;margin-top:10px;">Submit Review</button>
+            </div>
+
+            <div class="workspace-container">
+                <div>
+                    <div class="chat-window">
+                        <div class="chat-header">
+                            <h4 style="font-weight:700;"><i class="ti ti-messages"></i> Ticket Conversation Thread</h4>
+                            <span id="det-assignee" style="font-size:12px;color:var(--text2);">Assigned to: Unassigned</span>
+                        </div>
+                        <div class="chat-messages" id="det-messages">
+                            <!-- Message bubbles -->
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="reply-input" placeholder="Type response message..." onkeydown="if(event.key==='Enter') sendReply()">
+                            <button class="btn signup-btn" onclick="sendReply()" style="width:auto;padding:0 20px;"><i class="ti ti-send"></i> Send</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-weight:800;margin-bottom:15px;"><i class="ti ti-history"></i> Ticket Log</h3>
+                    <div class="timeline" id="det-timeline">
+                        <!-- History timeline log -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Floating AI Chatbot Panel -->
+<button id="chatbot-btn" onclick="toggleChatbot()" title="Talk to Zia AI"><i class="ti ti-robot"></i></button>
+<div id="chatbot-panel">
+    <div class="cb-header">
+        <div>
+            <h4 style="font-weight:700;">Zia AI Assistant</h4>
+            <p style="font-size:11px;opacity:0.8;">24/7 Contextual Support</p>
+        </div>
+        <button onclick="toggleChatbot()" style="background:none;border:none;color:white;cursor:none;font-size:20px;"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="cb-messages" id="chatbot-messages">
+        <div style="background:var(--surface);padding:10px;border-radius:10px;font-size:12px;color:var(--text);">
+            Hi! I am Zia, your DeskFlow AI assistant. Ask me questions like:
+            <ul style="margin-left:15px;margin-top:5px;display:flex;flex-direction:column;gap:3px;">
+                <li>"How to reset password?"</li>
+                <li>"Do you offer refunds?"</li>
+                <li>"Talk to human representative"</li>
+            </ul>
+        </div>
+    </div>
+    <div class="cb-input-row">
+        <input type="text" id="chatbot-input" placeholder="Ask Zia a question..." onkeydown="if(event.key==='Enter') sendChatbotMessage()">
+        <button class="btn signup-btn" onclick="sendChatbotMessage()" style="width:38px;height:38px;border-radius:10px;padding:0;flex-shrink:0;"><i class="ti ti-send"></i></button>
+    </div>
+</div>
+
+<script>
+// Authentication check
+let currentUser = null;
+try {
+    currentUser = JSON.parse(localStorage.getItem("deskflow_user"));
+} catch(e) {}
+
+if (!currentUser || currentUser.role !== "customer") {
+    alert("Unauthorized access, redirecting to sign-in.");
+    window.location.href = "signin.html";
+} else {
+    document.getElementById("user-name").innerText = currentUser.name;
+    document.getElementById("user-avatar").innerText = currentUser.name.charAt(0).toUpperCase();
+}
+
+// Custom Cursor Trail
+const cursor = document.getElementById("cursor");
+const cursorTrail = document.getElementById("cursor-trail");
+document.addEventListener("mousemove", (e) => {
+    cursor.style.left = e.clientX + "px";
+    cursor.style.top = e.clientY + "px";
+    cursorTrail.style.left = e.clientX + "px";
+    cursorTrail.style.top = e.clientY + "px";
+});
+
+// Theme Management
+const html = document.documentElement;
+const themeIcon = document.getElementById("theme-icon");
+if (localStorage.getItem("theme") === "light") {
+  html.setAttribute("data-theme", "light");
+  themeIcon.className = "ti ti-moon";
+}
+function toggleTheme() {
+  if (html.getAttribute("data-theme") === "light") {
+    html.setAttribute("data-theme", "dark");
+    themeIcon.className = "ti ti-sun";
+    localStorage.setItem("theme", "dark");
+  } else {
+    html.setAttribute("data-theme", "light");
+    themeIcon.className = "ti ti-moon";
+    localStorage.setItem("theme", "light");
+  }
+}
+
+// Panel switcher
+function switchPanel(panelId, element) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+    
+    document.getElementById("panel-" + panelId).classList.add("active");
+    if (element) element.classList.add("active");
+    
+    if (panelId === "dashboard") {
+        loadTickets();
+    } else if (panelId === "kb") {
+        loadArticles();
+    }
+}
+
+// Live AI prediction as user types (AI Ticket Categorization & Sentiment Simulation)
+function predictCategory() {
+    const sub = document.getElementById("ticket-subject").value.toLowerCase();
+    const desc = document.getElementById("ticket-desc").value.toLowerCase();
+    const toast = document.getElementById("ai-toast");
+    const predCat = document.getElementById("ai-pred-cat");
+    const predSent = document.getElementById("ai-pred-sent");
+
+    if (sub.length < 3 && desc.length < 3) {
+        toast.style.display = "none";
+        return;
+    }
+
+    toast.style.display = "flex";
+    
+    // Categorizer keywords
+    let cat = "General Inquiry";
+    if (sub.includes("invoice") || sub.includes("price") || sub.includes("billing") || sub.includes("refund") || desc.includes("payment")) {
+        cat = "Billing";
+    } else if (sub.includes("login") || sub.includes("password") || sub.includes("reset") || sub.includes("account") || desc.includes("access")) {
+        cat = "Account Access";
+    } else if (sub.includes("api") || sub.includes("bug") || sub.includes("error") || sub.includes("broken") || desc.includes("integration")) {
+        cat = "Technical Support";
+    }
+    
+    // Sentiment keywords
+    let sent = "Neutral";
+    const negativeWords = ["broken", "fail", "worst", "angry", "frustrated", "refund", "useless", "disappointed", "urgent"];
+    if (negativeWords.some(w => sub.includes(w) || desc.includes(w))) {
+        sent = "Negative";
+        predSent.style.color = "var(--pink)";
+    } else {
+        predSent.style.color = "var(--green)";
+    }
+
+    predCat.innerText = cat;
+    predSent.innerText = sent;
+}
+
+// Submit Ticket
+async function submitTicket() {
+    const subject = document.getElementById("ticket-subject").value.trim();
+    const priority = document.getElementById("ticket-priority").value;
+    const description = document.getElementById("ticket-desc").value.trim();
+
+    if (!subject || !description) {
+        alert("Please fill out the subject and description.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/api/tickets/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                subject,
+                description,
+                priority,
+                email: currentUser.email
+            })
+        });
+
+        const data = await response.json();
+        alert(data.message);
+
+        if (response.status === 201) {
+            // Reset input values
+            document.getElementById("ticket-subject").value = "";
+            document.getElementById("ticket-desc").value = "";
+            document.getElementById("ai-toast").style.display = "none";
+            switchPanel("dashboard");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Failed to submit support request.");
+    }
+}
+
+// Fetch Tickets and Update Metrics
+async function loadTickets() {
+    try {
+        const response = await fetch(`http://localhost:5000/api/tickets?email=${currentUser.email}&role=customer`);
+        const tickets = await response.json();
+
+        let total = tickets.length;
+        let pending = tickets.filter(t => t.status !== "Resolved").length;
+        let resolved = tickets.filter(t => t.status === "Resolved").length;
+
+        document.getElementById("stat-total").innerText = total;
+        document.getElementById("stat-pending").innerText = pending;
+        document.getElementById("stat-resolved").innerText = resolved;
+
+        const container = document.getElementById("tickets-container");
+        container.innerHTML = "";
+
+        if (total === 0) {
+            container.innerHTML = `<div style="text-align:center;color:var(--text3);padding:40px;">No support tickets found. Click 'Submit Ticket' to raise one!</div>`;
+            return;
+        }
+
+        tickets.forEach(ticket => {
+            let statusClass = "badge-status-open";
+            if (ticket.status === "In Progress") statusClass = "badge-status-progress";
+            if (ticket.status === "Resolved") statusClass = "badge-status-resolved";
+
+            let sentimentIcon = "ti-mood-neutral";
+            let sentimentColor = "var(--text2)";
+            if (ticket.sentiment === "Negative") {
+                sentimentIcon = "ti-mood-sad";
+                sentimentColor = "var(--pink)";
+            } else if (ticket.sentiment === "Positive") {
+                sentimentIcon = "ti-mood-smile";
+                sentimentColor = "var(--green)";
+            }
+
+            container.innerHTML += `
+            <div class="glass-card">
+                <div class="ticket-header">
+                    <span class="badge ${statusClass}">${ticket.status}</span>
+                    <span style="font-size:12px;color:var(--text2);font-weight:600;"><i class="ti ti-alert-circle"></i> Priority: ${ticket.priority}</span>
+                </div>
+                <h3 class="ticket-title">${ticket.subject}</h3>
+                <p class="ticket-desc">${ticket.description}</p>
+                <div class="ticket-footer">
+                    <div class="tf-meta">
+                        <span><i class="ti ti-hash"></i> #${ticket.id.substring(0, 6).toUpperCase()}</span>
+                        <span><i class="ti ti-category"></i> ${ticket.category}</span>
+                        <span style="color:${sentimentColor};"><i class="ti ${sentimentIcon}"></i> AI Sentiment: ${ticket.sentiment}</span>
+                    </div>
+                    <button class="btn-sm" onclick="openTicketWorkspace('${ticket.id}')"><i class="ti ti-brand-hipchat"></i> Manage</button>
+                </div>
+            </div>
+            `;
+        });
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// Expanded Workspace Details
+let activeTicketId = null;
+async function openTicketWorkspace(ticketId) {
+    try {
+        const response = await fetch(`http://localhost:5000/api/tickets/${ticketId}`);
+        const ticket = await response.json();
+        activeTicketId = ticketId;
+
+        document.getElementById("det-subject").innerText = ticket.subject;
+        document.getElementById("det-category").innerText = ticket.category;
+        
+        const statusBadge = document.getElementById("det-status");
+        statusBadge.innerText = ticket.status;
+        statusBadge.className = "badge";
+        if (ticket.status === "Open") statusBadge.classList.add("badge-status-open");
+        else if (ticket.status === "In Progress") statusBadge.classList.add("badge-status-progress");
+        else statusBadge.classList.add("badge-status-resolved");
+
+        const priorityBadge = document.getElementById("det-priority");
+        priorityBadge.innerText = `${ticket.priority} Priority`;
+
+        const sentimentBadge = document.getElementById("det-sentiment");
+        sentimentBadge.innerText = `AI Sentiment: ${ticket.sentiment}`;
+        sentimentBadge.style.background = ticket.sentiment === "Negative" ? "rgba(244,114,182,0.15)" : "rgba(34,211,165,0.15)";
+        sentimentBadge.style.color = ticket.sentiment === "Negative" ? "var(--pink)" : "var(--green)";
+
+        document.getElementById("det-assignee").innerText = ticket.assignedTo 
+            ? `Assigned to: ${ticket.assignedTo}` 
+            : `Assigned to: Zia AI / Unassigned`;
+
+        // Load Messages
+        const msgContainer = document.getElementById("det-messages");
+        msgContainer.innerHTML = "";
+        (ticket.messages || []).forEach(m => {
+            const time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            msgContainer.innerHTML += `
+            <div class="chat-msg ${m.sender === "customer" ? "customer" : "agent"}">
+                <div class="chat-bubble">${m.text}</div>
+                <div class="chat-time">${m.senderName || m.sender} at ${time}</div>
+            </div>
+            `;
+        });
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        // Load Timeline Log
+        const timeline = document.getElementById("det-timeline");
+        timeline.innerHTML = "";
+        (ticket.history || []).forEach(h => {
+            const time = new Date(h.timestamp).toLocaleString();
+            timeline.innerHTML += `
+            <div class="timeline-item">
+                <div class="timeline-title">${h.status}</div>
+                <div class="timeline-desc">${h.note} (${h.updatedBy})</div>
+                <div class="timeline-time">${time}</div>
+            </div>
+            `;
+        });
+
+        // CSAT Rating box display
+        const feedbackBox = document.getElementById("feedback-box");
+        if (ticket.status === "Resolved" && !ticket.rating) {
+            feedbackBox.style.display = "block";
+            resetStars();
+        } else {
+            feedbackBox.style.display = "none";
+        }
+
+        switchPanel("ticket-detail");
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// Send Reply
+async function sendReply() {
+    const input = document.getElementById("reply-input");
+    const text = input.value.trim();
+    if (!text || !activeTicketId) return;
+
+    try {
+        const response = await fetch(`http://localhost:5000/api/tickets/${activeTicketId}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                sender: "customer",
+                text,
+                senderName: currentUser.email
+            })
+        });
+
+        if (response.status === 200) {
+            input.value = "";
+            openTicketWorkspace(activeTicketId);
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// Rate Stars CSAT
+let currentRating = 5;
+function rateCSAT(rating) {
+    currentRating = rating;
+    const stars = document.querySelectorAll("#csat-stars i");
+    stars.forEach((star, idx) => {
+        if (idx < rating) {
+            star.classList.add("selected");
+            star.className = "ti ti-star-filled selected";
+        } else {
+            star.classList.remove("selected");
+            star.className = "ti ti-star";
+        }
+    });
+}
+function resetStars() {
+    rateCSAT(5);
+}
+
+// Submit rating
+async function submitFeedback() {
+    const comment = document.getElementById("csat-comment").value.trim();
+    try {
+        const response = await fetch(`http://localhost:5000/api/tickets/${activeTicketId}/feedback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rating: currentRating, feedback: comment })
+        });
+        const data = await response.json();
+        alert(data.message);
+        document.getElementById("csat-comment").value = "";
+        openTicketWorkspace(activeTicketId);
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// Help Center KB Articles
+async function loadArticles() {
+    const search = document.getElementById("kb-search").value;
+    try {
+        const response = await fetch(`http://localhost:5000/api/kb?search=${search}`);
+        const articles = await response.json();
+        const container = document.getElementById("kb-articles");
+        container.innerHTML = "";
+
+        if (articles.length === 0) {
+            container.innerHTML = `<div style="grid-column: span 2;text-align:center;color:var(--text3);padding:40px;">No matching articles found. Try searching for "reset", "refund", or "integrations".</div>`;
+            return;
+        }
+
+        articles.forEach(art => {
+            container.innerHTML += `
+            <div class="glass-card">
+                <h4 style="font-weight:700;margin-bottom:8px;color:var(--accent);"><i class="ti ti-help-circle"></i> ${art.question}</h4>
+                <p style="font-size:13px;line-height:1.6;color:var(--text2);">${art.answer}</p>
+                <div style="font-size:10px;color:var(--text3);margin-top:12px;font-weight:700;text-transform:uppercase;">Category: ${art.category}</div>
+            </div>
+            `;
+        });
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// Chatbot overlay controller
+function toggleChatbot() {
+    const panel = document.getElementById("chatbot-panel");
+    panel.style.display = panel.style.display === "flex" ? "none" : "flex";
+}
+
+const chatbotHistory = [];
+async function sendChatbotMessage() {
+    const input = document.getElementById("chatbot-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const messagesContainer = document.getElementById("chatbot-messages");
+    
+    // Append customer message
+    messagesContainer.innerHTML += `
+    <div style="align-self:flex-end;background:var(--accent);color:white;padding:8px 12px;border-radius:12px;border-bottom-right-radius:2px;font-size:13px;max-width:80%;margin-bottom:8px;">
+        ${text}
+    </div>
+    `;
+    input.value = "";
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    chatbotHistory.push({ sender: "customer", text });
+
+    try {
+        const response = await fetch("http://localhost:5000/api/chat/bot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message: text,
+                email: currentUser.email,
+                history: chatbotHistory
+            })
+        });
+
+        const data = await response.json();
+        
+        // Append Bot reply
+        messagesContainer.innerHTML += `
+        <div style="align-self:flex-start;background:var(--surface2);color:var(--text);padding:8px 12px;border-radius:12px;border-bottom-left-radius:2px;font-size:13px;max-width:80%;margin-bottom:8px;border:1px solid var(--border);">
+            <div style="font-size:9px;color:var(--accent);font-weight:700;margin-bottom:3px;"><i class="ti ti-sparkles"></i> Zia Bot</div>
+            ${data.reply}
+        </div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        chatbotHistory.push({ sender: "bot", text: data.reply });
+
+        // Auto reload tickets if bot created an escalation ticket
+        if (data.escalate) {
+            loadTickets();
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+function logout() {
+    localStorage.removeItem("deskflow_token");
+    localStorage.removeItem("deskflow_user");
+    window.location.href = "signin.html";
+}
+
+// Initial Load
+loadTickets();
+</script>
+</body>
+</html>

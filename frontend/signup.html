@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — DeskFlow AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+:root {
+  --bg:         #0a0a0f;
+  --surface:    rgba(255,255,255,0.04);
+  --surface2:   rgba(255,255,255,0.08);
+  --border:     rgba(255,255,255,0.08);
+  --border2:    rgba(255,255,255,0.14);
+  --text:       #f0f0ff;
+  --text2:      #9090b0;
+  --accent:     #6c63ff;
+  --accent-glow: rgba(108,99,255,0.3);
+  --radius:     16px;
+  --font:       'Plus Jakarta Sans', sans-serif;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="light"] {
+  --bg:       #f8f8ff;
+  --surface:  rgba(0,0,0,0.03);
+  --surface2: rgba(0,0,0,0.06);
+  --border:   rgba(0,0,0,0.08);
+  --border2:  rgba(0,0,0,0.14);
+  --text:     #0a0a1a;
+  --text2:    #505070;
+  --accent-glow: rgba(108,99,255,0.15);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    position:relative;
+    cursor:none;
+    transition:background var(--transition), color var(--transition);
+}
+
+/* Background Gradients */
+.bg-gradient {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:radial-gradient(circle at 80% 20%,rgba(108,99,255,0.15) 0%,transparent 50%),
+             radial-gradient(circle at 10% 80%,rgba(56,189,248,0.08) 0%,transparent 50%);
+}
+
+#cursor{position:fixed;width:12px;height:12px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,background 0.2s;mix-blend-mode:difference}
+#cursor-trail{position:fixed;width:36px;height:36px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform 0.1s ease;opacity:0.4}
+
+.card{
+    width:450px;
+    background:rgba(255,255,255,0.03);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:40px;
+    box-shadow:0 24px 80px rgba(0,0,0,0.4);
+    z-index:10;
+    transition:all var(--transition);
+    transform:translateY(0);
+}
+.card:hover{
+    border-color:var(--border2);
+    box-shadow:0 30px 90px rgba(108,99,255,0.1);
+}
+[data-theme="light"] .card{
+    background:rgba(255,255,255,0.75);
+    box-shadow:0 20px 40px rgba(0,0,0,0.05);
+}
+
+.logo-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-size:24px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+.logo-icon{
+    width:40px;
+    height:40px;
+    background:linear-gradient(135deg,var(--accent),#a78bfa);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    box-shadow:0 8px 24px var(--accent-glow);
+}
+
+h2{text-align:center;font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;}
+.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:30px;}
+
+.input-group{
+    position:relative;
+    margin-bottom:20px;
+}
+.input-group i{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text2);
+    font-size:18px;
+    pointer-events:none;
+}
+input,select{
+    width:100%;
+    padding:14px 14px 14px 48px;
+    border:1px solid var(--border);
+    outline:none;
+    border-radius:12px;
+    background:var(--surface);
+    color:var(--text);
+    font-size:15px;
+    transition:all var(--transition);
+}
+input:focus,select:focus{
+    border-color:var(--accent);
+    background:var(--surface2);
+    box-shadow:0 0 16px var(--accent-glow);
+}
+select option{
+    background:var(--bg);
+    color:var(--text);
+}
+input::placeholder{color:var(--text2);opacity:0.7;}
+
+.btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    cursor:none;
+    font-size:16px;
+    font-weight:700;
+    transition:all var(--transition);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+.signup-btn{
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    color:white;
+    box-shadow:0 8px 24px var(--accent-glow);
+}
+.signup-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 30px rgba(108,99,255,0.5);
+}
+.google-btn{
+    margin-top:15px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+}
+.google-btn:hover{
+    background:var(--surface2);
+    border-color:var(--accent);
+}
+
+.divider{
+    text-align:center;
+    margin:22px 0;
+    color:var(--text2);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:1px;
+}
+
+.footer{
+    text-align:center;
+    margin-top:24px;
+    font-size:14px;
+    color:var(--text2);
+}
+.footer a{
+    color:var(--accent);
+    text-decoration:none;
+    font-weight:600;
+    transition:color 0.2s;
+}
+.footer a:hover{
+    text-decoration:underline;
+}
+
+#theme-toggle {
+  position:absolute;
+  top:24px;
+  right:24px;
+  width:40px;
+  height:40px;
+  border:1px solid var(--border);
+  border-radius:50%;
+  background:var(--surface);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  color:var(--text2);
+  cursor:none;
+  transition:all var(--transition);
+}
+#theme-toggle:hover {
+  background:var(--surface2);
+  color:var(--accent);
+  border-color:var(--accent);
+  transform:rotate(15deg);
+}
+</style>
+</head>
+<body>
+
+<button id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+  <i class="ti ti-sun" id="theme-icon"></i>
+</button>
+
+<div class="bg-gradient"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<div class="card">
+    <div class="logo-row">
+        <div class="logo-icon"><i class="ti ti-headset"></i></div>
+        <span>DeskFlow<span style="color:var(--accent)">AI</span></span>
+    </div>
+
+    <h2>Create Account</h2>
+    <p class="subtitle">Join the AI-powered support workspace</p>
+
+    <div class="input-group">
+        <i class="ti ti-user"></i>
+        <input type="text" id="name" placeholder="Full Name" required>
+    </div>
+
+    <div class="input-group">
+        <i class="ti ti-mail"></i>
+        <input type="email" id="email" placeholder="Email Address" required>
+    </div>
+
+    <div class="input-group">
+        <i class="ti ti-lock"></i>
+        <input type="password" id="password" placeholder="Password" required>
+    </div>
+
+    <div class="input-group">
+        <i class="ti ti-users"></i>
+        <select id="role">
+            <option value="customer">Customer (User)</option>
+            <option value="agent">Support Agent</option>
+            <option value="admin">Administrator</option>
+        </select>
+    </div>
+
+    <button class="btn signup-btn" onclick="signup()">
+        <i class="ti ti-rocket"></i> Create Account
+    </button>
+
+    <div class="divider">OR</div>
+
+    <button class="btn google-btn" onclick="googleSignup()">
+        <i class="ti ti-brand-google"></i> Continue with Google
+    </button>
+
+    <div class="footer">
+        Already have an account?
+        <a href="signin.html">Sign In</a>
+    </div>
+</div>
+
+<script>
+// Theme Management
+const API_URL = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+const html = document.documentElement;
+const themeIcon = document.getElementById("theme-icon");
+
+if (localStorage.getItem("theme") === "light") {
+  html.setAttribute("data-theme", "light");
+  themeIcon.className = "ti ti-moon";
+}
+
+function toggleTheme() {
+  if (html.getAttribute("data-theme") === "light") {
+    html.setAttribute("data-theme", "dark");
+    themeIcon.className = "ti ti-sun";
+    localStorage.setItem("theme", "dark");
+  } else {
+    html.setAttribute("data-theme", "light");
+    themeIcon.className = "ti ti-moon";
+    localStorage.setItem("theme", "light");
+  }
+}
+
+// Custom Cursor Trail
+const cursor = document.getElementById("cursor");
+const cursorTrail = document.getElementById("cursor-trail");
+document.addEventListener("mousemove", (e) => {
+    cursor.style.left = e.clientX + "px";
+    cursor.style.top = e.clientY + "px";
+    cursorTrail.style.left = e.clientX + "px";
+    cursorTrail.style.top = e.clientY + "px";
+});
+
+async function signup(){
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("role").value;
+
+    if(!name || !email || !password){
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    try{
+        const response = await fetch(
+            `${API_URL}/api/auth/signup`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password, role })
+            }
+        );
+
+        const data = await response.json();
+        alert(data.message);
+
+        if (response.status === 201) {
+            window.location.href = "signin.html";
+        }
+    }
+    catch(error){
+        console.error(error);
+        alert("Unable to connect to the DeskFlow server.");
+    }
+}
+
+function googleSignup(){
+    alert("Google authentication is being initialized. Please complete registration with email & password.");
+}
+</script>
+</body>
+</html>

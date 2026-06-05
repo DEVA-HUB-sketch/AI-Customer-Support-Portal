@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile Settings — DeskFlow AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+:root {
+  --bg:         #0a0a0f;
+  --surface:    rgba(255,255,255,0.04);
+  --surface2:   rgba(255,255,255,0.08);
+  --border:     rgba(255,255,255,0.08);
+  --border2:    rgba(255,255,255,0.14);
+  --text:       #f0f0ff;
+  --text2:      #9090b0;
+  --accent:     #6c63ff;
+  --accent-glow: rgba(108,99,255,0.3);
+  --radius:     16px;
+  --font:       'Plus Jakarta Sans', sans-serif;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="light"] {
+  --bg:       #f8f8ff;
+  --surface:  rgba(0,0,0,0.03);
+  --surface2: rgba(0,0,0,0.06);
+  --border:   rgba(0,0,0,0.08);
+  --border2:  rgba(0,0,0,0.14);
+  --text:     #0a0a1a;
+  --text2:    #505070;
+  --accent-glow: rgba(108,99,255,0.15);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    position:relative;
+    cursor:none;
+    transition:background var(--transition), color var(--transition);
+}
+
+.bg-gradient {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:radial-gradient(circle at 50% 50%,rgba(108,99,255,0.12) 0%,transparent 50%);
+}
+
+#cursor{position:fixed;width:12px;height:12px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,background 0.2s;mix-blend-mode:difference}
+#cursor-trail{position:fixed;width:36px;height:36px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform 0.1s ease;opacity:0.4}
+
+.card{
+    width:450px;
+    background:rgba(255,255,255,0.03);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:40px;
+    box-shadow:0 24px 80px rgba(0,0,0,0.4);
+    z-index:10;
+    transition:all var(--transition);
+}
+[data-theme="light"] .card{
+    background:rgba(255,255,255,0.75);
+    box-shadow:0 20px 40px rgba(0,0,0,0.05);
+}
+
+h2{font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;text-align:center;}
+.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:30px;}
+
+.input-group{
+    position:relative;
+    margin-bottom:20px;
+}
+.input-group i{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text2);
+    font-size:18px;
+    pointer-events:none;
+}
+input{
+    width:100%;
+    padding:14px 14px 14px 48px;
+    border:1px solid var(--border);
+    outline:none;
+    border-radius:12px;
+    background:var(--surface);
+    color:var(--text);
+    font-size:15px;
+    transition:all var(--transition);
+}
+input:focus{
+    border-color:var(--accent);
+    background:var(--surface2);
+    box-shadow:0 0 16px var(--accent-glow);
+}
+input:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+.btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    cursor:none;
+    font-size:15px;
+    font-weight:700;
+    transition:all var(--transition);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+.primary-btn{
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    color:white;
+    box-shadow:0 8px 24px var(--accent-glow);
+    margin-bottom:15px;
+}
+.primary-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 30px rgba(108,99,255,0.5);
+}
+.secondary-btn{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+}
+.secondary-btn:hover{
+    background:var(--surface2);
+    border-color:var(--accent);
+}
+</style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<div class="card">
+    <h2>Profile Settings</h2>
+    <p class="subtitle" id="role-badge">Manage your DeskFlow profile</p>
+
+    <div class="input-group">
+        <i class="ti ti-user"></i>
+        <input type="text" id="name" placeholder="Full Name" required>
+    </div>
+
+    <div class="input-group">
+        <i class="ti ti-mail"></i>
+        <input type="email" id="email" placeholder="Email Address" disabled>
+    </div>
+
+    <button class="btn primary-btn" onclick="updateProfile()">
+        <i class="ti ti-device-floppy"></i> Save Profile Details
+    </button>
+
+    <button class="btn secondary-btn" onclick="goBack()">
+        <i class="ti ti-arrow-left"></i> Back to Dashboard
+    </button>
+</div>
+
+<script>
+// Custom Cursor Trail
+const cursor = document.getElementById("cursor");
+const cursorTrail = document.getElementById("cursor-trail");
+document.addEventListener("mousemove", (e) => {
+    cursor.style.left = e.clientX + "px";
+    cursor.style.top = e.clientY + "px";
+    cursorTrail.style.left = e.clientX + "px";
+    cursorTrail.style.top = e.clientY + "px";
+});
+
+// Load Profile
+let user = null;
+try {
+    user = JSON.parse(localStorage.getItem("deskflow_user"));
+} catch(e) {}
+
+if (!user) {
+    alert("Session expired, please sign in.");
+    window.location.href = "signin.html";
+} else {
+    document.getElementById("name").value = user.name;
+    document.getElementById("email").value = user.email;
+    document.getElementById("role-badge").innerText = `Role: ${user.role.toUpperCase()}`;
+}
+
+async function updateProfile(){
+    const name = document.getElementById("name").value.trim();
+    if(!name){
+        alert("Name cannot be empty.");
+        return;
+    }
+
+    try{
+        const response = await fetch(
+            "http://localhost:5000/api/auth/update-profile",
+            {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: user.email, name })
+            }
+        );
+
+        const data = await response.json();
+        alert(data.message);
+
+        if (response.status === 200) {
+            user.name = name;
+            localStorage.setItem("deskflow_user", JSON.stringify(user));
+        }
+    }
+    catch(error){
+        console.error(error);
+        alert("Unable to update profile.");
+    }
+}
+
+function goBack(){
+    if (user.role === "customer") window.location.href = "dashboard.html";
+    else if (user.role === "agent") window.location.href = "agent.html";
+    else if (user.role === "admin") window.location.href = "admin.html";
+}
+</script>
+</body>
+</html>

@@ -382,14 +382,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 2re
   </div>
   <div class="nav-actions">
     <button id="theme-toggle" title="Toggle theme"><i class="ti ti-sun"></i></button>
-    <button class="btn-ghost ripple-btn">Sign in</button>
-    <button class="btn-primary ripple-btn"><span>Start free</span></button>
+    <button class="btn-ghost ripple-btn" onclick="window.location.href='signin.html'">Sign In</button>
+    <button class="btn-primary ripple-btn" onclick="window.location.href='signup.html'"><span>Start free</span></button>
   </div>
   <button class="nav-mobile-btn" id="mobile-menu-btn" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
-
 <!-- Mobile Nav -->
 <div id="mobile-overlay"></div>
 <div id="mobile-nav">
@@ -398,7 +397,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 2re
   <a href="#ai-section">AI Tools</a>
   <a href="#testimonials">Reviews</a>
   <a href="#pricing">Pricing</a>
-  <button class="btn-primary ripple-btn" style="margin-top:1rem;width:100%;padding:12px;border-radius:12px;font-size:15px;"><span>Start free trial</span></button>
+  <button class="btn-primary ripple-btn" onclick="window.location.href='signup.html'"><span>Start Free</span></button>
 </div>
 
 <!-- ═══════════════════ HERO ═══════════════════ -->
@@ -416,7 +415,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 2re
     </h1>
     <p class="hero-sub">DeskFlow AI unifies every support channel, automates up to 80% of tickets with AI, and gives your agents superpowers — all in one beautiful platform.</p>
     <div class="hero-cta">
-      <button class="btn-hero btn-hero-primary ripple-btn">
+      <button class="btn-hero btn-hero-primary ripple-btn"onclick="window.location.href='signup.html'">
         <i class="ti ti-rocket"></i> Start for free
       </button>
       <button class="btn-hero btn-hero-secondary ripple-btn">
@@ -989,23 +988,47 @@ const botResponses = [
 ];
 let responseIndex = 0;
 
-function sendChatbotMsg() {
+const landingChatbotHistory = [];
+
+async function sendChatbotMsg() {
   const input = document.getElementById('chatbot-input');
   const msgs = document.getElementById('chatbot-messages');
   const text = input.value.trim();
   if (!text) return;
+  
   appendMsg(msgs, text, 'user', 'Me');
   input.value = '';
+  
   const typing = document.createElement('div');
   typing.className = 'msg bot';
   typing.innerHTML = `<div class="msg-av bot-av"><i class="ti ti-robot" style="font-size:12px;color:#fff"></i></div><div class="typing"><span></span><span></span><span></span></div>`;
   msgs.appendChild(typing);
   msgs.scrollTop = msgs.scrollHeight;
-  setTimeout(() => {
+
+  landingChatbotHistory.push({ sender: "customer", text });
+
+  try {
+    const response = await fetch("http://localhost:5000/api/chat/bot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        email: "guest@deskflow.ai",
+        history: landingChatbotHistory
+      })
+    });
+    
+    const data = await response.json();
     typing.remove();
-    appendMsg(msgs, botResponses[responseIndex++ % botResponses.length], 'bot', '');
+    appendMsg(msgs, data.reply, 'bot', '');
     msgs.scrollTop = msgs.scrollHeight;
-  }, 1000);
+    
+    landingChatbotHistory.push({ sender: "bot", text: data.reply });
+  } catch (error) {
+    typing.remove();
+    appendMsg(msgs, "Sorry, I am having trouble connecting to the DeskFlow server right now.", 'bot', '');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
 }
 
 function appendMsg(container, text, type, initials) {

@@ -1,0 +1,30 @@
+{
+  "users": {},
+  "tickets": {},
+  "kb": {
+    "1": {
+      "id": "1",
+      "category": "Account Access",
+      "question": "How do I reset my password?",
+      "answer": "Click 'Forgot Password' on the login screen, enter your email address, and fill out your new password to update your login credentials."
+    },
+    "2": {
+      "id": "2",
+      "category": "Billing",
+      "question": "Do you offer refunds?",
+      "answer": "Yes, we offer a 14-day money-back guarantee for all our premium billing subscriptions. Please submit a billing support ticket to request a refund."
+    },
+    "3": {
+      "id": "3",
+      "category": "Technical Support",
+      "question": "What integrations are supported?",
+      "answer": "DeskFlow AI supports native integrations with Slack, HubSpot, Jira, Salesforce, WhatsApp, and Shopify out of the box."
+    },
+    "4": {
+      "id": "4",
+      "category": "General Inquiry",
+      "question": "How does the AI chatbot work?",
+      "answer": "Our Zia AI Chatbot automatically reads customer messages, queries the local Help Center / FAQ Knowledge Base, performs sentiment checks, and resolves up to 80% of issues. It will escalate the conversation to a human support agent if it receives terms like 'human' or 'agent'."
+    }
+  }
+}
