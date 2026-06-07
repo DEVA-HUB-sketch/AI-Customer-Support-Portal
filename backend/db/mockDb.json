@@ -7,9 +7,200 @@
       "password": "$2a$10$RYeBMb/Uqwg5jmxXPpbLRO29cq2Z3JTKaTeJ/wZY.A8F/6GdHOhRG",
       "role": "customer",
       "createdAt": "2026-06-07T07:18:59.097Z"
+    },
+    "05ioWqlufLPigV15qu0wXJEyScw2": {
+      "uid": "05ioWqlufLPigV15qu0wXJEyScw2",
+      "name": "DevaDharshini K",
+      "email": "devadharshinik2510@gmail.com",
+      "role": "customer",
+      "provider": "google",
+      "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocLus-FmRgOKfvj6SFPsPDCvxPUzQHk3LQJZVWEpgkESaofwSGs=s96-c",
+      "createdAt": "2026-06-07T10:59:46.183Z"
+    },
+    "5zsfqd0ojgn": {
+      "uid": "5zsfqd0ojgn",
+      "email": "girija@gmail.com",
+      "name": "girija",
+      "password": "$2a$10$Kz.5crmEqSZmY/aQM8pcvuapMm6cNO4C4Sh6IXojJnN.hh.OYTso6",
+      "role": "admin",
+      "createdAt": "2026-06-07T11:50:59.212Z"
+    },
+    "ljorafhstdo": {
+      "uid": "ljorafhstdo",
+      "email": "mano@gmail.com",
+      "name": "mano",
+      "password": "$2a$10$7MAK980idVOSH3Rmqd6HpOhBdlOh58RuSIxsGP3pcUFsPMkekRrNi",
+      "role": "agent",
+      "createdAt": "2026-06-07T11:52:11.696Z"
     }
   },
-  "tickets": {},
+  "tickets": {
+    "jf1uk58icp": {
+      "subject": "login issue",
+      "description": "Even i login with correct password and email it is ahowinh error",
+      "priority": "High",
+      "category": "Account Access",
+      "sentiment": "Negative",
+      "status": "Open",
+      "createdAt": "2026-06-07T11:49:58.194Z",
+      "createdBy": "deva@gmail.com",
+      "assignedTo": "mano@gmail.com",
+      "rating": null,
+      "feedback": null,
+      "history": [
+        {
+          "status": "Open",
+          "updatedBy": "deva@gmail.com",
+          "timestamp": "2026-06-07T11:49:58.194Z",
+          "note": "Ticket created and automatically categorized by Zia AI."
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:36:44.898Z",
+          "note": "Status changed from Open to Open."
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:36:48.771Z",
+          "note": "Status changed from Open to Open."
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:36:50.111Z",
+          "note": "Ticket assigned to agent: mano@gmail.com"
+        }
+      ],
+      "messages": [
+        {
+          "sender": "customer",
+          "text": "Even i login with correct password and email it is ahowinh error",
+          "timestamp": "2026-06-07T11:49:58.194Z",
+          "senderName": "deva@gmail.com"
+        },
+        {
+          "sender": "agent",
+          "text": "try to reset your password",
+          "timestamp": "2026-06-07T11:52:49.539Z",
+          "senderName": "mano@gmail.com"
+        }
+      ]
+    },
+    "6n8k0turd84": {
+      "subject": "Getting charged twice for the exact same item or service",
+      "description": "Getting charged twice for the exact same item or service, which often happens due to system glitches or overlapping manual and automated systems",
+      "priority": "Medium",
+      "category": "Billing",
+      "sentiment": "Neutral",
+      "status": "In Progress",
+      "createdAt": "2026-06-07T12:35:38.727Z",
+      "createdBy": "deva@gmail.com",
+      "assignedTo": "mano@gmail.com",
+      "rating": null,
+      "feedback": null,
+      "history": [
+        {
+          "status": "Open",
+          "updatedBy": "deva@gmail.com",
+          "timestamp": "2026-06-07T12:35:38.728Z",
+          "note": "Ticket created and automatically categorized by Zia AI."
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:36:42.349Z",
+          "note": "Status changed from Open to Open."
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:36:52.891Z",
+          "note": "Ticket assigned to agent: mano@gmail.com"
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:40:31.685Z",
+          "note": "Status changed from Open to Open."
+        },
+        {
+          "status": "In Progress",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:49:04.533Z",
+          "note": "Status changed from Open to In Progress."
+        }
+      ],
+      "messages": [
+        {
+          "sender": "customer",
+          "text": "Getting charged twice for the exact same item or service, which often happens due to system glitches or overlapping manual and automated systems",
+          "timestamp": "2026-06-07T12:35:38.728Z",
+          "senderName": "deva@gmail.com"
+        },
+        {
+          "sender": "agent",
+          "text": "I will check your issue, please rovide pproduct details",
+          "timestamp": "2026-06-07T12:36:21.237Z",
+          "senderName": "mano@gmail.com"
+        }
+      ]
+    },
+    "p2542bnovl": {
+      "subject": "Getting charged twice",
+      "description": "Charged twice for same item",
+      "priority": "High",
+      "category": "Billing",
+      "sentiment": "Neutral",
+      "status": "In Progress",
+      "createdAt": "2026-06-07T12:40:46.856Z",
+      "createdBy": "deva@gmail.com",
+      "assignedTo": "mano@gmail.com",
+      "rating": null,
+      "feedback": null,
+      "history": [
+        {
+          "status": "Open",
+          "updatedBy": "deva@gmail.com",
+          "timestamp": "2026-06-07T12:40:46.856Z",
+          "note": "Ticket created and automatically categorized by Zia AI."
+        },
+        {
+          "status": "Open",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:48:55.690Z",
+          "note": "Status changed from Open to Open."
+        },
+        {
+          "status": "In Progress",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:48:59.100Z",
+          "note": "Status changed from Open to In Progress."
+        },
+        {
+          "status": "In Progress",
+          "updatedBy": "mano@gmail.com",
+          "timestamp": "2026-06-07T12:49:35.683Z",
+          "note": "Ticket assigned to agent: mano@gmail.com"
+        }
+      ],
+      "messages": [
+        {
+          "sender": "customer",
+          "text": "Charged twice for same item",
+          "timestamp": "2026-06-07T12:40:46.856Z",
+          "senderName": "deva@gmail.com"
+        },
+        {
+          "sender": "agent",
+          "text": "share your product and payemet details",
+          "timestamp": "2026-06-07T12:49:23.132Z",
+          "senderName": "mano@gmail.com"
+        }
+      ]
+    }
+  },
   "kb": {
     "1": {
       "id": "1",
@@ -34,6 +225,60 @@
       "category": "General Inquiry",
       "question": "How does the AI chatbot work?",
       "answer": "Our Zia AI Chatbot automatically reads customer messages, queries the local Help Center / FAQ Knowledge Base, performs sentiment checks, and resolves up to 80% of issues. It will escalate the conversation to a human support agent if it receives terms like 'human' or 'agent'."
+    },
+    "5": {
+      "id": "5",
+      "category": "Account Access",
+      "question": "How do I enable two-factor authentication (2FA)?",
+      "answer": "Go to Profile Settings, click Security, then enable Two-Factor Authentication. You will receive a verification code via email each time you log in. We recommend enabling 2FA for all accounts to protect your data."
+    },
+    "6": {
+      "id": "6",
+      "category": "Account Access",
+      "question": "My account is locked. How do I unlock it?",
+      "answer": "Accounts get locked after 5 failed login attempts. To unlock your account, click 'Forgot Password' to reset credentials, or open a support ticket with your registered email and our team will manually unlock it within 1 hour."
+    },
+    "7": {
+      "id": "7",
+      "category": "Billing",
+      "question": "How do I download my invoice?",
+      "answer": "Log in to your account, navigate to Billing in the Settings panel, and click 'Download Invoice' next to any completed billing cycle. Invoices are available in PDF format and sent automatically to your registered email after each payment."
+    },
+    "8": {
+      "id": "8",
+      "category": "Billing",
+      "question": "How do I cancel my subscription?",
+      "answer": "To cancel your subscription, go to Settings > Billing > Subscription and click 'Cancel Plan'. Your access will remain active until the end of the current billing period. No further charges will be made after cancellation."
+    },
+    "9": {
+      "id": "9",
+      "category": "Technical Support",
+      "question": "What are the API rate limits?",
+      "answer": "DeskFlow AI enforces a rate limit of 1000 API requests per minute per API key. If you exceed this limit, you will receive a 429 Too Many Requests response. Contact support to request an increased rate limit for enterprise plans."
+    },
+    "10": {
+      "id": "10",
+      "category": "General Inquiry",
+      "question": "What are your support hours?",
+      "answer": "Our human support agents are available Monday–Friday, 9 AM to 6 PM IST. The Zia AI chatbot is available 24/7 and can resolve most common issues instantly. For urgent issues outside business hours, open a High-priority ticket and it will be addressed first thing the next business day."
+    },
+    "11": {
+      "id": "11",
+      "category": "Feature Request",
+      "question": "How do I request a new feature?",
+      "answer": "We love customer feedback! To request a new feature, open a support ticket with the category 'Feature Request' and describe the feature in detail. Our product team reviews all feature requests and posts updates to our public roadmap monthly."
+    },
+    "12": {
+      "id": "12",
+      "category": "Feature Request",
+      "question": "Where can I view the product roadmap?",
+      "answer": "Our public product roadmap is updated every month and reflects customer-voted features, bug fixes, and upcoming releases. You can view it at deskflow.ai/roadmap. Voting on existing items helps us prioritize what gets built first."
+    },
+    "4xanbcd0f7x": {
+      "question": "Getting charged twice for the exact same item or service",
+      "answer": "Always request an itemized receipt to verify charges, and contact customer support immediately to initiate a charge dispute or request a refund.",
+      "category": "Billing",
+      "createdAt": "2026-06-07T12:50:31.774Z"
     }
   },
   "ai_conversations": {
@@ -596,6 +841,52 @@
       ],
       "updatedAt": "2026-06-07T09:58:10.169Z",
       "createdAt": "2026-06-07T09:57:20.615Z"
+    },
+    "session_1780829999846": {
+      "email": "devadharshinik2510@gmail.com",
+      "sessionId": "session_1780829999846",
+      "messages": [
+        {
+          "role": "user",
+          "text": "I cannot find my address",
+          "timestamp": "2026-06-07T10:59:59.848Z"
+        },
+        {
+          "role": "model",
+          "text": "Thank you for reaching out! Could you describe the issue in a bit more detail so I can assist you better? For urgent concerns, open a support ticket from your dashboard and a human agent will respond within 2 hours.",
+          "timestamp": "2026-06-07T10:59:59.848Z"
+        }
+      ],
+      "updatedAt": "2026-06-07T10:59:59.848Z",
+      "createdAt": "2026-06-07T10:59:59.848Z"
+    },
+    "session_1780832779094": {
+      "email": "deva@gmail.com",
+      "sessionId": "session_1780832779094",
+      "messages": [
+        {
+          "role": "user",
+          "text": "even though my password is correct it is showing error while I enter my password in sign in page",
+          "timestamp": "2026-06-07T11:46:19.098Z"
+        },
+        {
+          "role": "model",
+          "text": "For login issues, try resetting your password: click 'Forgot Password' on the sign-in page and follow the email instructions. If your account is locked, please open a support ticket and an agent will unlock it within 1 hour.",
+          "timestamp": "2026-06-07T11:46:19.098Z"
+        },
+        {
+          "role": "user",
+          "text": "if I login into my account there is no AI chatbot to message with",
+          "timestamp": "2026-06-07T11:46:46.378Z"
+        },
+        {
+          "role": "model",
+          "text": "For login issues, try resetting your password: click 'Forgot Password' on the sign-in page and follow the email instructions. If your account is locked, please open a support ticket and an agent will unlock it within 1 hour.",
+          "timestamp": "2026-06-07T11:46:46.378Z"
+        }
+      ],
+      "updatedAt": "2026-06-07T11:46:46.378Z",
+      "createdAt": "2026-06-07T11:46:19.099Z"
     }
   },
   "ai_categorizations": {
@@ -608,6 +899,16 @@
       "reason": "Account keywords detected.",
       "source": "fallback",
       "categorizedAt": "2026-06-07T08:36:24.756Z"
+    },
+    "5hgvagrz5ty": {
+      "email": "deva@gmail.com",
+      "subject": "login issue",
+      "description": "if i login in with the correct password, also it is showing error",
+      "category": "Account Issue",
+      "confidence": 80,
+      "reason": "Account keywords detected.",
+      "source": "fallback",
+      "categorizedAt": "2026-06-07T11:48:32.859Z"
     }
   }
 }
