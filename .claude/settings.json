@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(powershell -Command \"Get-ChildItem -Recurse -Filter 'serviceAccountKey.json' -ErrorAction SilentlyContinue | Select-Object FullName\")"
+    ]
+  }
+}
