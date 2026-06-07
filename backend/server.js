@@ -13,12 +13,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(require("path").join(__dirname, "../frontend")));
 
+// Activity logging middleware — attaches req.clientIp
+const { activityMiddleware } = require("./services/activityLogger");
+app.use(activityMiddleware);
+
 // Routes Mount
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/tickets", require("./routes/ticketRoutes"));
-app.use("/api/chat", require("./routes/chatRoutes"));
-app.use("/api/kb", require("./routes/kbRoutes"));
-app.use("/api/ai", require("./routes/aiRoutes"));
+app.use("/api/auth",     require("./routes/authRoutes"));
+app.use("/api/tickets",  require("./routes/ticketRoutes"));
+app.use("/api/chat",     require("./routes/chatRoutes"));
+app.use("/api/kb",       require("./routes/kbRoutes"));
+app.use("/api/ai",       require("./routes/aiRoutes"));
+app.use("/api/analytics",require("./routes/analyticsRoutes"));
+app.use("/api/activity", require("./routes/activityRoutes"));
 
 app.get("/", (req, res) => {
   res.json({

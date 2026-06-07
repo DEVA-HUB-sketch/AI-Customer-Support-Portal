@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
 const { getChatbotReply, analyzeSentiment } = require("../services/aiService");
+const { log, ACTIONS } = require("../services/activityLogger");
 
 // POST /api/chat/bot
 router.post("/bot", async (req, res) => {
@@ -11,7 +12,27 @@ router.post("/bot", async (req, res) => {
     
     // Get AI Chatbot Response
     const botResult = getChatbotReply(message, history);
-    
+
+    // Search KB first — return KB answer if matched and not escalating
+    const kbSnap = await db.collection("kb").get();
+    const kbArticles = [];
+    kbSnap.forEach(doc => kbArticles.push(doc.data()));
+    const clean = message.toLowerCase();
+    const kbMatch = kbArticles.find(a => {
+      const q = a.question.toLowerCase();
+      return (
+        clean.includes(q.substring(0, 20)) ||
+        q.split(" ").some(w => w.length > 4 && clean.includes(w))
+      );
+    });
+    if (kbMatch && !botResult.escalate) {
+      log({ userId: email || "anonymous", email: email || "", role: "customer",
+            action: ACTIONS.KB_SEARCHED,
+            details: { query: (message || "").substring(0, 100), matched: kbMatch.question },
+            ip: req.clientIp });
+      return res.json({ reply: kbMatch.answer, source: "kb", escalate: false });
+    }
+
     let ticketId = null;
     
     // If bot decides to escalate, auto-create a support ticket
@@ -53,6 +74,11 @@ router.post("/bot", async (req, res) => {
       botResult.reply += ` A support ticket has been logged under ID: #${ticketId.substring(0, 6).toUpperCase()}.`;
     }
     
+    log({ userId: email || "anonymous", email: email || "", role: "customer",
+          action: ACTIONS.AI_CHAT_USED,
+          details: { message: (message || "").substring(0, 120), escalated: botResult.escalate, ticketId },
+          ip: req.clientIp });
+
     res.json({
       reply: botResult.reply,
       escalate: botResult.escalate,

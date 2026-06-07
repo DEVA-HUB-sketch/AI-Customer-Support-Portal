@@ -48,7 +48,6 @@ body{
     transition:background var(--transition), color var(--transition);
 }
 
-/* Background Gradients */
 .bg-gradient {
   position:absolute;
   inset:0;
@@ -155,12 +154,17 @@ input::placeholder{color:var(--text2);opacity:0.7;}
     justify-content:center;
     gap:8px;
 }
+.btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+    transform:none !important;
+}
 .signup-btn{
     background:linear-gradient(135deg,var(--accent),#8b5cf6);
     color:white;
     box-shadow:0 8px 24px var(--accent-glow);
 }
-.signup-btn:hover{
+.signup-btn:hover:not(:disabled){
     transform:translateY(-2px);
     box-shadow:0 12px 30px rgba(108,99,255,0.5);
 }
@@ -170,7 +174,7 @@ input::placeholder{color:var(--text2);opacity:0.7;}
     border:1px solid var(--border);
     color:var(--text);
 }
-.google-btn:hover{
+.google-btn:hover:not(:disabled){
     background:var(--surface2);
     border-color:var(--accent);
 }
@@ -223,6 +227,54 @@ input::placeholder{color:var(--text2);opacity:0.7;}
   border-color:var(--accent);
   transform:rotate(15deg);
 }
+
+/* ── Toast Notifications ── */
+#toast-container {
+  position:fixed;
+  top:20px;
+  right:20px;
+  z-index:999999;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.toast {
+  padding:14px 18px;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:280px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  animation:toastIn 0.3s ease forwards;
+  backdrop-filter:blur(12px);
+}
+.toast.success {
+  background:rgba(16,185,129,0.15);
+  border:1px solid rgba(16,185,129,0.3);
+  color:#34d399;
+}
+.toast.error {
+  background:rgba(239,68,68,0.15);
+  border:1px solid rgba(239,68,68,0.3);
+  color:#f87171;
+}
+.toast.info {
+  background:rgba(108,99,255,0.15);
+  border:1px solid rgba(108,99,255,0.3);
+  color:#a78bfa;
+}
+@keyframes toastIn {
+  from { opacity:0; transform:translateX(40px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity:1; transform:translateX(0); }
+  to   { opacity:0; transform:translateX(40px); }
+}
+@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -233,9 +285,9 @@ input::placeholder{color:var(--text2);opacity:0.7;}
 
 <div class="bg-gradient"></div>
 
-<!-- Custom Cursor -->
 <div id="cursor"></div>
 <div id="cursor-trail"></div>
+<div id="toast-container"></div>
 
 <div class="card">
     <div class="logo-row">
@@ -270,13 +322,13 @@ input::placeholder{color:var(--text2);opacity:0.7;}
         </select>
     </div>
 
-    <button class="btn signup-btn" onclick="signup()">
+    <button class="btn signup-btn" id="signup-btn" onclick="signup()">
         <i class="ti ti-rocket"></i> Create Account
     </button>
 
     <div class="divider">OR</div>
 
-    <button class="btn google-btn" onclick="googleSignup()">
+    <button class="btn google-btn" id="google-btn" onclick="googleSignup()">
         <i class="ti ti-brand-google"></i> Continue with Google
     </button>
 
@@ -286,17 +338,21 @@ input::placeholder{color:var(--text2);opacity:0.7;}
     </div>
 </div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="firebase-init.js"></script>
+
 <script>
-// Theme Management
-const API_URL = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+const API_URL = "http://localhost:5000";
 const html = document.documentElement;
 const themeIcon = document.getElementById("theme-icon");
 
+// ── Theme ──────────────────────────────────────────────────────────
 if (localStorage.getItem("theme") === "light") {
   html.setAttribute("data-theme", "light");
   themeIcon.className = "ti ti-moon";
 }
-
 function toggleTheme() {
   if (html.getAttribute("data-theme") === "light") {
     html.setAttribute("data-theme", "dark");
@@ -309,7 +365,7 @@ function toggleTheme() {
   }
 }
 
-// Custom Cursor Trail
+// ── Custom Cursor ─────────────────────────────────────────────────
 const cursor = document.getElementById("cursor");
 const cursorTrail = document.getElementById("cursor-trail");
 document.addEventListener("mousemove", (e) => {
@@ -319,42 +375,131 @@ document.addEventListener("mousemove", (e) => {
     cursorTrail.style.top = e.clientY + "px";
 });
 
-async function signup(){
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const role = document.getElementById("role").value;
-
-    if(!name || !email || !password){
-        alert("Please fill in all fields.");
-        return;
-    }
-
-    try{
-        const response = await fetch(
-            `${API_URL}/api/auth/signup`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password, role })
-            }
-        );
-
-        const data = await response.json();
-        alert(data.message);
-
-        if (response.status === 201) {
-            window.location.href = "signin.html";
-        }
-    }
-    catch(error){
-        console.error(error);
-        alert("Unable to connect to the DeskFlow server.");
-    }
+// ── Toast ─────────────────────────────────────────────────────────
+function showToast(message, type = "success", duration = 4000) {
+  const container = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  const icons = { success: "ti-check", error: "ti-alert-triangle", info: "ti-info-circle" };
+  const icon = document.createElement("i");
+  icon.className = `ti ${icons[type] || "ti-info-circle"}`;
+  const text = document.createElement("span");
+  text.textContent = message;
+  toast.appendChild(icon);
+  toast.appendChild(text);
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = "toastOut 0.3s ease forwards";
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
 }
 
-function googleSignup(){
-    alert("Google authentication is being initialized. Please complete registration with email & password.");
+// ── Role-based redirect ───────────────────────────────────────────
+function redirectByRole(role) {
+  if (role === "agent")  { window.location.href = "agent.html";   return; }
+  if (role === "admin")  { window.location.href = "admin.html";   return; }
+  window.location.href = "dashboard.html";
+}
+
+// ── Email / Password Signup (existing — unchanged logic) ──────────
+async function signup() {
+  const name     = document.getElementById("name").value.trim();
+  const email    = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const role     = document.getElementById("role").value;
+  const btn      = document.getElementById("signup-btn");
+
+  if (!name || !email || !password) {
+    showToast("Please fill in all fields.", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i style="display:inline-block;animation:spin 0.8s linear infinite">↻</i> Creating account…';
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/signup`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ name, email, password, role })
+    });
+
+    const data = await response.json();
+
+    if (response.status === 201) {
+      showToast("Account created! Redirecting to sign in…", "success");
+      setTimeout(() => { window.location.href = "signin.html"; }, 1500);
+    } else {
+      showToast(data.message || "Signup failed. Please try again.", "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-rocket"></i> Create Account';
+    }
+  } catch (error) {
+    console.error("Signup error:", error);
+    showToast("Unable to connect to the DeskFlow server.", "error");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-rocket"></i> Create Account';
+  }
+}
+
+// ── Google Sign Up / Sign In (same flow — Google handles both) ────
+async function googleSignup() {
+  const btn = document.getElementById("google-btn");
+
+  btn.disabled = true;
+  btn.innerHTML = '<i style="display:inline-block;animation:spin 0.8s linear infinite">↻</i> Connecting to Google…';
+
+  try {
+    // Firebase popup — handles both new and existing Google accounts
+    const result = await firebaseAuth.signInWithPopup(googleProvider);
+    const gUser  = result.user;
+    const idToken = await gUser.getIdToken();
+
+    showToast("Google account verified. Setting up your account…", "info", 2500);
+
+    // Backend creates user record if new, or fetches existing record
+    const response = await fetch(`${API_URL}/api/auth/google`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idToken,
+        uid:      gUser.uid,
+        name:     gUser.displayName  || gUser.email.split("@")[0],
+        email:    gUser.email,
+        photoURL: gUser.photoURL     || ""
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("deskflow_token", data.token);
+      localStorage.setItem("deskflow_user",  JSON.stringify(data.user));
+      showToast(`Welcome, ${data.user.name}! Redirecting…`, "success");
+      setTimeout(() => redirectByRole(data.role), 1200);
+    } else {
+      showToast(data.message || "Google signup failed. Please try again.", "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-brand-google"></i> Continue with Google';
+    }
+
+  } catch (error) {
+    console.error("Google signup error:", error);
+
+    const messages = {
+      "auth/popup-closed-by-user":               "Sign-up cancelled — popup was closed.",
+      "auth/popup-blocked":                      "Popup blocked. Please allow popups for this site.",
+      "auth/network-request-failed":             "Network error. Please check your connection.",
+      "auth/account-exists-with-different-credential": "An account with this email already exists.",
+      "auth/cancelled-popup-request":            "Only one sign-in popup can be open at a time.",
+      "auth/unauthorized-domain":                "This domain is not authorised in Firebase Console."
+    };
+
+    const msg = messages[error.code] || error.message || "Google authentication failed.";
+    showToast(msg, "error");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brand-google"></i> Continue with Google';
+  }
 }
 </script>
 </body>

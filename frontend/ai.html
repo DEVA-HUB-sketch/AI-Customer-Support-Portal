@@ -1,0 +1,2529 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeskFlow AI Assistant — AI Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — Crystal Teal + Neon Cyan Theme
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:          #050816;
+  --bg2:         #0B1120;
+  --bg3:         #0d1628;
+  --surface:     rgba(0,212,199,0.04);
+  --surface2:    rgba(0,212,199,0.08);
+  --border:      rgba(0,212,199,0.12);
+  --border2:     rgba(0,212,199,0.22);
+  --text:        #e0f8ff;
+  --text2:       #7ab8c8;
+  --text3:       #3a6070;
+  --teal:        #00D4C7;
+  --cyan:        #00F5FF;
+  --blue:        #38BDF8;
+  --teal-glow:   rgba(0,212,199,0.20);
+  --cyan-glow:   rgba(0,245,255,0.15);
+  --blue-glow:   rgba(56,189,248,0.18);
+  --radius:      16px;
+  --radius-sm:   10px;
+  --font:        'Plus Jakarta Sans', sans-serif;
+  --transition:  0.3s cubic-bezier(0.4,0,0.2,1);
+  --green:       #00D4C7;
+  --pink:        #f472b6;
+  --orange:      #fb923c;
+  --sidebar-w:   260px;
+}
+
+/* ── Reset ── */
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--teal);}
+
+/* ── Animated Background ── */
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  display:flex;
+  cursor:none;
+  position:relative;
+}
+
+#bg-canvas{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Neon grid overlay */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,199,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,199,0.04) 1px, transparent 1px);
+  background-size:50px 50px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── Custom Cursor ── */
+#cursor{position:fixed;width:10px;height:10px;background:var(--cyan);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:screen;box-shadow:0 0 12px var(--cyan);}
+#cursor-trail{position:fixed;width:32px;height:32px;border:1.5px solid var(--teal);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform .12s ease;opacity:.4;}
+
+/* ─────────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────────── */
+.app-shell{
+  display:flex;
+  width:100%;
+  min-height:100vh;
+  position:relative;
+  z-index:1;
+}
+
+/* ── Sidebar ── */
+aside{
+  width:var(--sidebar-w);
+  background:rgba(11,17,32,0.92);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  padding:28px 18px;
+  z-index:100;
+  flex-shrink:0;
+  backdrop-filter:blur(20px);
+}
+
+.brand{
+  display:flex;align-items:center;gap:10px;
+  font-size:18px;font-weight:800;
+  margin-bottom:36px;color:var(--text);
+}
+.brand .logo-box{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  color:#050816;font-size:18px;
+  box-shadow:0 0 16px var(--teal-glow);
+}
+.brand-name{background:linear-gradient(90deg,var(--teal),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+nav{display:flex;flex-direction:column;gap:6px;flex:1;}
+
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 14px;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:var(--transition);
+  border:1px solid transparent;
+}
+.nav-item:hover{background:var(--surface);color:var(--text);border-color:var(--border);}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(0,212,199,0.12),rgba(0,245,255,0.06));
+  color:var(--cyan);border-color:var(--border2);
+  box-shadow:0 0 12px var(--cyan-glow);
+}
+.nav-item i{font-size:17px;}
+
+.nav-divider{height:1px;background:var(--border);margin:12px 0;}
+
+.nav-logout{color:var(--pink) !important;}
+.nav-logout:hover{background:rgba(244,114,182,0.08) !important;border-color:rgba(244,114,182,0.2) !important;}
+
+/* AI Status Badge */
+.ai-status{
+  margin-top:auto;padding:14px;
+  background:linear-gradient(135deg,rgba(0,212,199,0.08),rgba(0,245,255,0.04));
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+}
+.ai-status-dot{
+  width:8px;height:8px;background:var(--teal);border-radius:50%;
+  display:inline-block;margin-right:7px;
+  animation:pulse-dot 2s ease-in-out infinite;
+  box-shadow:0 0 8px var(--teal);
+}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
+.ai-status-text{font-size:12px;color:var(--text2);}
+.ai-status-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.05em;}
+
+/* ── Main Content ── */
+main{
+  flex:1;display:flex;flex-direction:column;
+  min-width:0;overflow:hidden;
+}
+
+/* ── Top Header ── */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;
+  background:rgba(11,17,32,0.8);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  position:sticky;top:0;z-index:50;
+}
+.header-title{
+  display:flex;align-items:center;gap:12px;
+}
+.header-title h1{font-size:20px;font-weight:800;color:var(--text);}
+.header-title span{font-size:13px;color:var(--text2);}
+.header-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(0,212,199,0.15),rgba(0,245,255,0.08));
+  border:1px solid var(--border2);
+  font-size:11px;font-weight:700;color:var(--teal);
+  letter-spacing:.06em;
+}
+.header-actions{display:flex;align-items:center;gap:10px;}
+.hdr-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;transition:var(--transition);font-size:17px;
+}
+.hdr-btn:hover{background:var(--surface2);color:var(--teal);border-color:var(--border2);box-shadow:0 0 10px var(--teal-glow);}
+.hdr-user{
+  display:flex;align-items:center;gap:9px;
+  padding:6px 12px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;
+}
+.hdr-user-avatar{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#050816;
+}
+.hdr-user-name{font-size:13px;font-weight:600;color:var(--text);}
+
+/* ── Panel Content Area ── */
+.content-area{
+  flex:1;overflow-y:auto;padding:24px 28px;
+}
+
+/* Panel display */
+.panel{display:none;}
+.panel.active{display:flex;flex-direction:column;gap:22px;}
+
+/* ─────────────────────────────────────────────────
+   GLASSMORPHISM CARD
+───────────────────────────────────────────────── */
+.glass-card{
+  background:rgba(11,17,32,0.7);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  backdrop-filter:blur(16px);
+  transition:var(--transition);
+}
+.glass-card:hover{border-color:var(--border2);}
+
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 14px;
+  border-bottom:1px solid var(--border);
+}
+.card-title{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;color:var(--text);}
+.card-title i{color:var(--teal);font-size:18px;}
+.card-body{padding:20px;}
+
+/* Neon glow card variant */
+.neon-card{
+  box-shadow:0 0 0 1px var(--border),0 0 20px rgba(0,212,199,0.06);
+}
+.neon-card:hover{
+  box-shadow:0 0 0 1px var(--border2),0 0 32px rgba(0,212,199,0.12);
+}
+
+/* ─────────────────────────────────────────────────
+   GRID LAYOUTS
+───────────────────────────────────────────────── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+/* ─────────────────────────────────────────────────
+   STAT CARDS
+───────────────────────────────────────────────── */
+.stat-card{
+  padding:20px;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--border);
+  transition:var(--transition);
+}
+.stat-card:hover{background:var(--surface2);border-color:var(--border2);}
+.stat-label{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-value{font-size:28px;font-weight:800;color:var(--text);}
+.stat-value.teal{color:var(--teal);}
+.stat-value.cyan{color:var(--cyan);}
+.stat-value.blue{color:var(--blue);}
+.stat-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:14px;
+}
+.stat-icon.teal{background:rgba(0,212,199,0.12);color:var(--teal);}
+.stat-icon.cyan{background:rgba(0,245,255,0.10);color:var(--cyan);}
+.stat-icon.blue{background:rgba(56,189,248,0.12);color:var(--blue);}
+.stat-icon.pink{background:rgba(244,114,182,0.12);color:var(--pink);}
+
+/* ─────────────────────────────────────────────────
+   BADGE / TAG
+───────────────────────────────────────────────── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:.04em;
+}
+.badge-teal{background:rgba(0,212,199,0.12);color:var(--teal);border:1px solid rgba(0,212,199,0.2);}
+.badge-cyan{background:rgba(0,245,255,0.10);color:var(--cyan);border:1px solid rgba(0,245,255,0.18);}
+.badge-green{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.2);}
+.badge-red{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.badge-yellow{background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
+.badge-blue{background:rgba(56,189,248,0.12);color:var(--blue);border:1px solid rgba(56,189,248,0.2);}
+.badge-purple{background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.2);}
+
+/* ─────────────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 18px;border-radius:10px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  border:none;transition:var(--transition);outline:none;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  color:#050816;
+  box-shadow:0 0 16px var(--teal-glow);
+}
+.btn-primary:hover{box-shadow:0 0 24px rgba(0,212,199,0.4);transform:translateY(-1px);}
+.btn-primary:active{transform:translateY(0);}
+.btn-ghost{
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text2);
+}
+.btn-ghost:hover{background:var(--surface2);border-color:var(--border2);color:var(--text);}
+.btn-danger{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;}
+.btn-sm{padding:7px 13px;font-size:12px;}
+.btn-icon{padding:8px;border-radius:8px;}
+
+/* ─────────────────────────────────────────────────
+   FORM INPUTS
+───────────────────────────────────────────────── */
+.form-group{display:flex;flex-direction:column;gap:7px;}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.form-input,.form-textarea,.form-select{
+  background:rgba(0,212,199,0.04);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-size:14px;
+  padding:10px 14px;
+  transition:var(--transition);
+  outline:none;
+  font-family:var(--font);
+  width:100%;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  border-color:var(--teal);
+  background:rgba(0,212,199,0.07);
+  box-shadow:0 0 0 3px rgba(0,212,199,0.10);
+}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text3);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-select{cursor:pointer;}
+.form-select option{background:#0B1120;color:var(--text);}
+
+/* ─────────────────────────────────────────────────
+   PANEL 1 — AI CHATBOT
+───────────────────────────────────────────────── */
+.chat-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;height:calc(100vh - 200px);}
+
+.chat-main{display:flex;flex-direction:column;height:100%;}
+
+.chat-messages{
+  flex:1;overflow-y:auto;padding:16px;
+  display:flex;flex-direction:column;gap:14px;
+}
+
+.chat-bubble{
+  max-width:75%;padding:12px 16px;border-radius:14px;
+  font-size:14px;line-height:1.6;animation:fadeUp .3s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.chat-bubble.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,rgba(0,212,199,0.18),rgba(0,245,255,0.10));
+  border:1px solid rgba(0,212,199,0.25);
+  border-bottom-right-radius:4px;
+  color:var(--text);
+}
+.chat-bubble.ai{
+  align-self:flex-start;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-bottom-left-radius:4px;
+  color:var(--text);
+}
+.bubble-meta{font-size:10px;color:var(--text3);margin-top:5px;display:flex;align-items:center;gap:5px;}
+.bubble-sender{font-weight:600;color:var(--teal);font-size:11px;margin-bottom:4px;}
+
+.chat-typing{
+  display:none;align-self:flex-start;padding:10px 16px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:14px;border-bottom-left-radius:4px;
+}
+.typing-dots{display:flex;gap:5px;align-items:center;}
+.typing-dots span{
+  width:7px;height:7px;background:var(--teal);border-radius:50%;
+  animation:typing-bounce 1.4s infinite ease-in-out both;
+}
+.typing-dots span:nth-child(2){animation-delay:.16s;}
+.typing-dots span:nth-child(3){animation-delay:.32s;}
+@keyframes typing-bounce{0%,80%,100%{transform:scale(0.6);}40%{transform:scale(1);}}
+
+.chat-input-bar{
+  display:flex;gap:10px;padding:14px;
+  border-top:1px solid var(--border);
+  background:rgba(11,17,32,0.5);
+}
+.chat-input-bar .form-input{flex:1;}
+
+/* Chat sidebar (session info) */
+.chat-sidebar{display:flex;flex-direction:column;gap:14px;}
+
+.ai-avatar-card{
+  padding:20px;text-align:center;
+  background:linear-gradient(135deg,rgba(0,212,199,0.08),rgba(0,245,255,0.04));
+  border:1px solid var(--border);border-radius:var(--radius);
+}
+.ai-avatar{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  margin:0 auto 12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;color:#050816;
+  box-shadow:0 0 30px rgba(0,212,199,0.3),0 0 60px rgba(0,212,199,0.1);
+  animation:avatar-glow 3s ease-in-out infinite;
+}
+@keyframes avatar-glow{0%,100%{box-shadow:0 0 30px rgba(0,212,199,0.3),0 0 60px rgba(0,212,199,0.1);}50%{box-shadow:0 0 40px rgba(0,245,255,0.4),0 0 80px rgba(0,245,255,0.15);}}
+.ai-name{font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.ai-role{font-size:12px;color:var(--text2);}
+
+.quick-actions{display:flex;flex-direction:column;gap:7px;}
+.quick-action-btn{
+  padding:9px 14px;border-radius:9px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text2);font-size:12px;cursor:pointer;
+  transition:var(--transition);text-align:left;
+  display:flex;align-items:center;gap:8px;
+}
+.quick-action-btn:hover{background:var(--surface2);color:var(--teal);border-color:var(--border2);}
+
+/* ─────────────────────────────────────────────────
+   PANEL 2 — VOICE ASSISTANT
+───────────────────────────────────────────────── */
+.voice-center{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:360px;gap:28px;
+}
+.voice-orb-wrap{position:relative;width:180px;height:180px;}
+.voice-orb{
+  width:180px;height:180px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--cyan),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:56px;color:#050816;
+  cursor:pointer;
+  box-shadow:0 0 40px rgba(0,212,199,0.25),0 0 80px rgba(0,212,199,0.08);
+  transition:var(--transition);
+  position:relative;z-index:2;
+}
+.voice-orb:hover{box-shadow:0 0 60px rgba(0,212,199,0.4),0 0 100px rgba(0,212,199,0.15);transform:scale(1.04);}
+.voice-orb.listening{animation:orb-pulse 1s ease-in-out infinite;}
+@keyframes orb-pulse{0%,100%{box-shadow:0 0 40px rgba(0,245,255,0.5),0 0 80px rgba(0,245,255,0.2);}50%{box-shadow:0 0 70px rgba(0,245,255,0.7),0 0 130px rgba(0,245,255,0.3);}}
+
+.orb-ring{
+  position:absolute;inset:-18px;border-radius:50%;
+  border:2px solid rgba(0,212,199,0.2);
+  animation:ring-expand 2s ease-in-out infinite;
+}
+.orb-ring:nth-child(2){inset:-34px;animation-delay:.4s;}
+.orb-ring:nth-child(3){inset:-50px;animation-delay:.8s;}
+@keyframes ring-expand{0%{opacity:.6;transform:scale(0.95);}100%{opacity:0;transform:scale(1.08);}}
+
+.voice-status-text{font-size:18px;font-weight:700;color:var(--text);text-align:center;}
+.voice-transcript{
+  width:100%;max-width:560px;
+  padding:14px 18px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:14px;color:var(--text2);min-height:52px;text-align:center;
+  font-style:italic;
+}
+.voice-controls{display:flex;gap:12px;}
+
+.voice-waveform{
+  width:100%;max-width:400px;height:56px;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+}
+.wave-bar{
+  width:4px;background:var(--teal);border-radius:2px;
+  animation:wave-dance 1.2s ease-in-out infinite;
+  opacity:.3;
+}
+.voice-orb.listening~.voice-waveform .wave-bar{opacity:1;}
+@keyframes wave-dance{0%,100%{height:8px;}50%{height:36px;}}
+
+/* ─────────────────────────────────────────────────
+   PANEL 3 — FAQ SEARCH
+───────────────────────────────────────────────── */
+.faq-search-bar{display:flex;gap:10px;margin-bottom:20px;}
+.faq-search-bar .form-input{flex:1;}
+
+.faq-ai-answer{
+  padding:18px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,rgba(0,212,199,0.07),rgba(0,245,255,0.03));
+  border:1px solid var(--border2);
+  margin-bottom:18px;display:none;
+}
+.faq-ai-label{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.faq-ai-text{font-size:14px;color:var(--text);line-height:1.65;}
+
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.faq-card{
+  padding:16px;border-radius:var(--radius-sm);
+  background:var(--surface);border:1px solid var(--border);
+  transition:var(--transition);cursor:pointer;
+}
+.faq-card:hover{background:var(--surface2);border-color:var(--border2);}
+.faq-q{font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.faq-a{font-size:12px;color:var(--text2);line-height:1.5;}
+.faq-tag{display:inline-flex;margin-top:8px;}
+
+/* ─────────────────────────────────────────────────
+   PANEL 4 — SENTIMENT ANALYSIS
+───────────────────────────────────────────────── */
+.sentiment-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;}
+
+.sentiment-meter{
+  display:flex;flex-direction:column;align-items:center;
+  gap:18px;padding:28px;
+}
+.sentiment-emoji{
+  font-size:80px;
+  animation:emoji-bounce .6s ease;
+  transition:var(--transition);
+}
+@keyframes emoji-bounce{0%{transform:scale(0.5);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+.sentiment-label-big{font-size:28px;font-weight:800;}
+.sentiment-label-big.Positive{color:#4ade80;}
+.sentiment-label-big.Neutral{color:var(--blue);}
+.sentiment-label-big.Negative{color:#f87171;}
+
+.score-bar-wrap{width:100%;max-width:300px;}
+.score-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px;}
+.score-bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.score-bar-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--teal),var(--cyan));
+  width:0;transition:width 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sentiment-breakdown{display:flex;flex-direction:column;gap:14px;}
+.sent-row{display:flex;align-items:center;gap:12px;}
+.sent-row-label{width:70px;font-size:13px;color:var(--text2);}
+.sent-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.sent-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.sent-fill.pos{background:linear-gradient(90deg,#22d3a5,#4ade80);}
+.sent-fill.neu{background:linear-gradient(90deg,var(--blue),#7dd3fc);}
+.sent-fill.neg{background:linear-gradient(90deg,#ef4444,#f87171);}
+.sent-count{font-size:12px;font-weight:700;color:var(--text);min-width:28px;text-align:right;}
+
+/* ─────────────────────────────────────────────────
+   PANEL 5 — TICKET CATEGORIZATION
+───────────────────────────────────────────────── */
+.cat-result-card{
+  padding:20px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  transition:var(--transition);display:none;
+  margin-bottom:16px;
+}
+.cat-result-card.show{display:flex;align-items:center;gap:16px;}
+.cat-icon-big{
+  width:56px;height:56px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  flex-shrink:0;
+}
+.cat-info h3{font-size:18px;font-weight:800;margin-bottom:4px;}
+.cat-info p{font-size:13px;color:var(--text2);}
+.confidence-pill{
+  margin-left:auto;padding:6px 14px;border-radius:20px;
+  font-size:13px;font-weight:700;
+  background:linear-gradient(135deg,rgba(0,212,199,0.15),rgba(0,245,255,0.08));
+  border:1px solid var(--border2);color:var(--teal);
+}
+
+.cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.cat-tile{
+  padding:16px 12px;border-radius:var(--radius-sm);
+  background:var(--surface);border:1px solid var(--border);
+  text-align:center;transition:var(--transition);cursor:default;
+}
+.cat-tile:hover{background:var(--surface2);border-color:var(--border2);}
+.cat-tile-icon{font-size:26px;margin-bottom:8px;}
+.cat-tile-name{font-size:11px;font-weight:600;color:var(--text2);}
+.cat-tile.highlight{
+  background:linear-gradient(135deg,rgba(0,212,199,0.12),rgba(0,245,255,0.06));
+  border-color:var(--border2);
+}
+.cat-tile.highlight .cat-tile-name{color:var(--teal);}
+
+/* ─────────────────────────────────────────────────
+   PANEL 6 — SUGGESTED RESPONSES
+───────────────────────────────────────────────── */
+.suggest-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:18px;}
+.suggest-cards{display:flex;flex-direction:column;gap:12px;}
+.suggest-card{
+  padding:16px;border-radius:var(--radius-sm);
+  background:var(--surface);border:1px solid var(--border);
+  transition:var(--transition);position:relative;
+}
+.suggest-card:hover{background:var(--surface2);border-color:var(--border2);}
+.suggest-num{
+  position:absolute;top:12px;left:14px;
+  width:22px;height:22px;border-radius:6px;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#050816;
+}
+.suggest-text{font-size:14px;color:var(--text);line-height:1.6;padding-left:34px;}
+.suggest-actions{display:flex;gap:7px;margin-top:10px;padding-left:34px;}
+.copy-btn{
+  padding:5px 11px;border-radius:7px;font-size:11px;font-weight:600;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;transition:var(--transition);
+}
+.copy-btn:hover{color:var(--teal);border-color:var(--border2);}
+
+/* ─────────────────────────────────────────────────
+   PANEL 7 — CONVERSATION HISTORY
+───────────────────────────────────────────────── */
+.history-layout{display:grid;grid-template-columns:300px 1fr;gap:20px;height:calc(100vh - 200px);}
+.history-list{
+  overflow-y:auto;display:flex;flex-direction:column;gap:8px;
+}
+.history-item{
+  padding:13px 15px;border-radius:var(--radius-sm);
+  background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:var(--transition);
+}
+.history-item:hover{background:var(--surface2);border-color:var(--border2);}
+.history-item.active{background:linear-gradient(135deg,rgba(0,212,199,0.10),rgba(0,245,255,0.05));border-color:var(--border2);}
+.hist-preview{font-size:13px;color:var(--text);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);}
+
+.history-detail{overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+.history-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;color:var(--text3);gap:12px;font-size:14px;
+}
+
+/* ─────────────────────────────────────────────────
+   PANEL 8 — AI ANALYTICS
+───────────────────────────────────────────────── */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+.donut-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  padding:24px;
+}
+.donut-chart{position:relative;width:180px;height:180px;}
+.donut-chart svg{transform:rotate(-90deg);}
+.donut-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.donut-val{font-size:26px;font-weight:800;color:var(--text);}
+.donut-lbl{font-size:11px;color:var(--text2);}
+
+.donut-legend{display:flex;flex-direction:column;gap:9px;width:100%;}
+.legend-row{display:flex;align-items:center;gap:10px;font-size:13px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.legend-label{color:var(--text2);flex:1;}
+.legend-val{font-weight:700;color:var(--text);}
+
+.bar-chart{display:flex;flex-direction:column;gap:12px;padding:4px 0;}
+.bar-row{display:flex;align-items:center;gap:12px;}
+.bar-row-label{width:130px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.bar-fill{
+  height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;
+  font-size:11px;font-weight:700;color:#050816;
+  transition:width 1.2s cubic-bezier(0.4,0,0.2,1);
+  background:linear-gradient(90deg,var(--teal),var(--cyan));
+}
+
+/* ─────────────────────────────────────────────────
+   NOTIFICATIONS / TOASTS
+───────────────────────────────────────────────── */
+#toast-container{
+  position:fixed;bottom:24px;right:24px;z-index:99990;
+  display:flex;flex-direction:column;gap:10px;
+}
+.toast{
+  padding:12px 18px;border-radius:12px;
+  background:rgba(11,17,32,0.95);border:1px solid var(--border2);
+  color:var(--text);font-size:13px;font-weight:500;
+  backdrop-filter:blur(16px);
+  display:flex;align-items:center;gap:10px;
+  animation:toast-in .3s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+@keyframes toast-in{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.toast.success{border-color:rgba(0,212,199,0.35);}
+.toast.error{border-color:rgba(239,68,68,0.35);}
+.toast i{font-size:16px;}
+.toast.success i{color:var(--teal);}
+.toast.error i{color:#f87171;}
+
+/* ─────────────────────────────────────────────────
+   LOADING SKELETON
+───────────────────────────────────────────────── */
+.skeleton{
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;
+  animation:skeleton-shimmer 1.5s infinite;
+  border-radius:6px;
+}
+@keyframes skeleton-shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ─────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────── */
+@media(max-width:1200px){
+  .chat-layout{grid-template-columns:1fr;}
+  .chat-sidebar{display:none;}
+  .sentiment-layout{grid-template-columns:1fr;}
+  .history-layout{grid-template-columns:1fr;}
+  .history-detail{display:none;}
+  .cat-grid{grid-template-columns:repeat(3,1fr);}
+  .suggest-form{grid-template-columns:1fr 1fr;}
+  .analytics-grid{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  aside{display:none;}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  .faq-grid{grid-template-columns:1fr;}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .suggest-form{grid-template-columns:1fr;}
+  .content-area{padding:16px;}
+  header{padding:14px 18px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<div class="app-shell">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside>
+  <div class="brand">
+    <div class="logo-box"><i class="ti ti-brain"></i></div>
+    <span class="brand-name">DeskFlow AI</span>
+  </div>
+
+  <nav>
+    <div class="nav-item active" data-panel="chatbot">
+      <i class="ti ti-message-dots"></i> AI Chatbot
+    </div>
+    <div class="nav-item" data-panel="voice">
+      <i class="ti ti-microphone"></i> Voice Assistant
+    </div>
+    <div class="nav-item" data-panel="faq">
+      <i class="ti ti-search"></i> FAQ Search
+    </div>
+    <div class="nav-item" data-panel="sentiment">
+      <i class="ti ti-mood-smile"></i> Sentiment Analysis
+    </div>
+    <div class="nav-item" data-panel="categorize">
+      <i class="ti ti-tags"></i> Ticket Categorization
+    </div>
+    <div class="nav-item" data-panel="suggest">
+      <i class="ti ti-bulb"></i> AI Suggestions
+    </div>
+    <div class="nav-item" data-panel="history">
+      <i class="ti ti-history"></i> Conversation History
+    </div>
+    <div class="nav-item" data-panel="analytics">
+      <i class="ti ti-chart-bar"></i> AI Analytics
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-item" id="back-btn">
+      <i class="ti ti-arrow-left"></i> Back to Dashboard
+    </div>
+    <div class="nav-item nav-logout" id="logout-btn">
+      <i class="ti ti-logout"></i> Sign Out
+    </div>
+  </nav>
+
+  <div class="ai-status">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <span class="ai-status-dot"></span>
+      <span class="ai-status-label">ZIA AI ONLINE</span>
+    </div>
+    <div class="ai-status-text">Gemini 1.5 Flash · Ready</div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main>
+  <!-- Header -->
+  <header>
+    <div class="header-title">
+      <div>
+        <h1>DeskFlow AI Assistant</h1>
+        <span id="panel-subtitle">AI Chatbot Panel</span>
+      </div>
+      <span class="header-badge"><i class="ti ti-sparkles"></i> GEMINI POWERED</span>
+    </div>
+    <div class="header-actions">
+      <div class="hdr-btn" id="new-session-btn" title="New Chat Session">
+        <i class="ti ti-plus"></i>
+      </div>
+      <div class="hdr-btn" title="Refresh">
+        <i class="ti ti-refresh"></i>
+      </div>
+      <div class="hdr-user">
+        <div class="hdr-user-avatar" id="user-avatar">?</div>
+        <span class="hdr-user-name" id="user-name">Loading…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- ════════════════════════════════════════
+         PANEL 1 — AI CHATBOT
+    ════════════════════════════════════════ -->
+    <div class="panel active" id="panel-chatbot">
+      <div class="chat-layout">
+        <!-- Main Chat -->
+        <div class="glass-card neon-card chat-main">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-message-dots"></i> Chat with Zia</div>
+            <div style="display:flex;gap:8px;">
+              <span class="badge badge-teal" id="chat-session-badge">New Session</span>
+              <button class="btn btn-ghost btn-sm" id="clear-chat-btn">
+                <i class="ti ti-trash"></i> Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages">
+            <!-- Welcome message -->
+            <div class="chat-bubble ai">
+              <div class="bubble-sender"><i class="ti ti-robot"></i> Zia AI</div>
+              Hello! I'm <strong>Zia</strong>, your DeskFlow AI Assistant. I can help with account issues, billing, technical support, and more. How can I assist you today?
+              <div class="bubble-meta"><span>Just now</span></div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing">
+            <div class="typing-dots">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <div class="chat-input-bar">
+            <input type="text" class="form-input" id="chat-input" placeholder="Type your message…" autocomplete="off">
+            <button class="btn btn-ghost btn-icon" id="voice-chat-btn" title="Voice Input">
+              <i class="ti ti-microphone"></i>
+            </button>
+            <button class="btn btn-primary" id="send-chat-btn">
+              <i class="ti ti-send"></i> Send
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Sidebar -->
+        <div class="chat-sidebar">
+          <div class="ai-avatar-card">
+            <div class="ai-avatar"><i class="ti ti-robot"></i></div>
+            <div class="ai-name">Zia</div>
+            <div class="ai-role">DeskFlow AI · Customer Support Specialist</div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="card-title"><i class="ti ti-bolt"></i> Quick Actions</div>
+            </div>
+            <div class="card-body" style="padding:12px;">
+              <div class="quick-actions">
+                <div class="quick-action-btn" onclick="quickAsk('How do I reset my password?')">
+                  <i class="ti ti-lock"></i> Reset Password
+                </div>
+                <div class="quick-action-btn" onclick="quickAsk('I need a refund for my subscription')">
+                  <i class="ti ti-receipt-refund"></i> Request Refund
+                </div>
+                <div class="quick-action-btn" onclick="quickAsk('I am having a technical issue with the API')">
+                  <i class="ti ti-bug"></i> Report Bug
+                </div>
+                <div class="quick-action-btn" onclick="quickAsk('What integrations does DeskFlow support?')">
+                  <i class="ti ti-plug"></i> View Integrations
+                </div>
+                <div class="quick-action-btn" onclick="quickAsk('I need to speak to a human agent')">
+                  <i class="ti ti-headset"></i> Talk to Agent
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="card-title"><i class="ti ti-info-circle"></i> Session Info</div>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:9px;font-size:13px;">
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text2);">Messages</span>
+                  <span id="msg-count" style="font-weight:700;">1</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text2);">Model</span>
+                  <span style="font-weight:700;color:var(--teal);">Gemini 1.5 Flash</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text2);">Mode</span>
+                  <span id="ai-mode-lbl" style="font-weight:700;color:var(--cyan);">AI</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 2 — VOICE ASSISTANT
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-voice">
+      <div class="grid-2">
+        <div class="glass-card neon-card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-microphone"></i> Voice Input</div>
+            <span class="badge badge-cyan" id="voice-status-badge">Idle</span>
+          </div>
+          <div class="card-body">
+            <div class="voice-center">
+              <div class="voice-orb-wrap">
+                <div class="orb-ring"></div>
+                <div class="orb-ring"></div>
+                <div class="orb-ring"></div>
+                <div class="voice-orb" id="voice-orb">
+                  <i class="ti ti-microphone" id="voice-orb-icon"></i>
+                </div>
+              </div>
+
+              <div class="voice-waveform" id="voice-waveform">
+                <!-- Bars generated by JS -->
+              </div>
+
+              <div class="voice-status-text" id="voice-status-text">Tap to speak</div>
+
+              <div class="voice-transcript" id="voice-transcript">
+                Your words will appear here…
+              </div>
+
+              <div class="voice-controls">
+                <button class="btn btn-primary" id="start-voice-btn">
+                  <i class="ti ti-microphone"></i> Start Listening
+                </button>
+                <button class="btn btn-ghost" id="stop-voice-btn" disabled>
+                  <i class="ti ti-player-stop"></i> Stop
+                </button>
+              </div>
+
+              <div class="form-group" style="width:100%;max-width:320px;">
+                <label class="form-label" style="text-align:center;display:block;">Recognition Language</label>
+                <select class="form-select" id="voice-lang-select" onchange="loadVoices()">
+                  <option value="en-US">🇬🇧 English (US)</option>
+                  <option value="hi-IN">🇮🇳 Hindi — हिन्दी</option>
+                  <option value="ta-IN">🇮🇳 Tamil — தமிழ்</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card neon-card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-volume"></i> Voice Output (TTS)</div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div class="form-group">
+                <label class="form-label">AI Response</label>
+                <textarea class="form-textarea" id="tts-text" rows="5" placeholder="AI response will appear here…"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Voice</label>
+                <select class="form-select" id="voice-select"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Speed: <span id="rate-val">1.0</span>x</label>
+                <input type="range" min="0.5" max="2" step="0.1" value="1" id="rate-slider"
+                  style="width:100%;accent-color:var(--teal);">
+              </div>
+              <div style="display:flex;gap:10px;">
+                <button class="btn btn-primary" id="speak-btn">
+                  <i class="ti ti-volume"></i> Speak
+                </button>
+                <button class="btn btn-ghost" id="stop-tts-btn">
+                  <i class="ti ti-player-stop"></i> Stop
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;padding:14px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);">
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Voice Workflow</div>
+              <div style="display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--text2);">
+                <div style="display:flex;align-items:center;gap:8px;"><span class="badge badge-teal">1</span> Speak into mic</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span class="badge badge-cyan">2</span> Speech → Text (Web Speech API)</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span class="badge badge-blue">3</span> Sent to Gemini AI</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span class="badge badge-teal">4</span> Response displayed + spoken</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card neon-card" id="voice-response-card" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-robot"></i> Zia AI Voice Response</div>
+        </div>
+        <div class="card-body">
+          <div id="voice-ai-response" style="font-size:15px;line-height:1.7;color:var(--text);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 3 — FAQ SEARCH
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-faq">
+      <div class="glass-card neon-card">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-search"></i> AI-Powered FAQ Search</div>
+          <span class="badge badge-cyan">Gemini RAG</span>
+        </div>
+        <div class="card-body">
+          <div class="faq-search-bar">
+            <input type="text" class="form-input" id="faq-input" placeholder="Ask any question… e.g. How do I reset my password?">
+            <button class="btn btn-primary" id="faq-search-btn">
+              <i class="ti ti-search"></i> Search
+            </button>
+          </div>
+
+          <div class="faq-ai-answer" id="faq-ai-answer">
+            <div class="faq-ai-label"><i class="ti ti-sparkles"></i> Zia AI Answer</div>
+            <div class="faq-ai-text" id="faq-ai-text"></div>
+          </div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Knowledge Base Articles</div>
+          <div class="faq-grid" id="faq-grid">
+            <div style="height:80px;border-radius:var(--radius-sm);" class="skeleton"></div>
+            <div style="height:80px;border-radius:var(--radius-sm);" class="skeleton"></div>
+            <div style="height:80px;border-radius:var(--radius-sm);" class="skeleton"></div>
+            <div style="height:80px;border-radius:var(--radius-sm);" class="skeleton"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 4 — SENTIMENT ANALYSIS
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-sentiment">
+      <div class="glass-card neon-card">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-mood-smile"></i> Sentiment Analysis</div>
+          <span class="badge badge-teal">Real-time AI</span>
+        </div>
+        <div class="card-body">
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Enter Customer Message</label>
+            <textarea class="form-textarea" id="sentiment-input" rows="4"
+              placeholder="Paste or type a customer message to analyze its sentiment…"></textarea>
+          </div>
+          <button class="btn btn-primary" id="analyze-btn">
+            <i class="ti ti-mood-search"></i> Analyze Sentiment
+          </button>
+        </div>
+      </div>
+
+      <div class="sentiment-layout">
+        <div class="glass-card neon-card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-chart-pie"></i> Result</div>
+          </div>
+          <div class="card-body">
+            <div class="sentiment-meter">
+              <div class="sentiment-emoji" id="sent-emoji">🤔</div>
+              <div class="sentiment-label-big" id="sent-label">Awaiting Input</div>
+              <div class="score-bar-wrap">
+                <div class="score-bar-label">
+                  <span>Confidence Score</span>
+                  <span id="sent-score">0%</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill" id="sent-bar"></div>
+                </div>
+              </div>
+              <div style="font-size:13px;color:var(--text2);text-align:center;max-width:280px;line-height:1.5;" id="sent-explanation">
+                Analyze a customer message to see sentiment results here.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card neon-card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-chart-bar"></i> Analytics Breakdown</div>
+          </div>
+          <div class="card-body">
+            <div class="sentiment-breakdown" id="sent-breakdown">
+              <div class="sent-row">
+                <div class="sent-row-label">😊 Positive</div>
+                <div class="sent-track"><div class="sent-fill pos" id="pos-bar" style="width:0%"></div></div>
+                <div class="sent-count" id="pos-count">0</div>
+              </div>
+              <div class="sent-row">
+                <div class="sent-row-label">😐 Neutral</div>
+                <div class="sent-track"><div class="sent-fill neu" id="neu-bar" style="width:0%"></div></div>
+                <div class="sent-count" id="neu-count">0</div>
+              </div>
+              <div class="sent-row">
+                <div class="sent-row-label">😠 Negative</div>
+                <div class="sent-track"><div class="sent-fill neg" id="neg-bar" style="width:0%"></div></div>
+                <div class="sent-count" id="neg-count">0</div>
+              </div>
+            </div>
+            <div style="margin-top:20px;font-size:12px;color:var(--text3);">
+              Session totals — counts update as you analyze messages.
+            </div>
+
+            <div style="margin-top:18px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Quick Test Messages</div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <div class="quick-action-btn" onclick="quickSentiment('This service is absolutely terrible! I\'ve been waiting 3 days for a response!')">
+                  😠 Negative example
+                </div>
+                <div class="quick-action-btn" onclick="quickSentiment('Thank you so much! The support team was incredibly helpful and resolved my issue quickly.')">
+                  😊 Positive example
+                </div>
+                <div class="quick-action-btn" onclick="quickSentiment('I need to update my billing information on my account.')">
+                  😐 Neutral example
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 5 — TICKET CATEGORIZATION
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-categorize">
+      <div class="glass-card neon-card">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-tags"></i> AI Ticket Categorization</div>
+          <span class="badge badge-blue">Auto-classify</span>
+        </div>
+        <div class="card-body">
+          <div class="grid-2" style="gap:14px;margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Ticket Subject</label>
+              <input type="text" class="form-input" id="cat-subject" placeholder="e.g. Cannot process payment">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-input" id="cat-desc" placeholder="Brief description of the issue">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="categorize-btn">
+            <i class="ti ti-tags"></i> Categorize Ticket
+          </button>
+        </div>
+      </div>
+
+      <div class="cat-result-card glass-card neon-card" id="cat-result">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="glass-card neon-card">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-layout-grid"></i> Category Overview</div>
+        </div>
+        <div class="card-body">
+          <div class="cat-grid" id="cat-grid">
+            <div class="cat-tile" data-cat="Technical Issue">
+              <div class="cat-tile-icon">🔧</div>
+              <div class="cat-tile-name">Technical Issue</div>
+            </div>
+            <div class="cat-tile" data-cat="Billing Issue">
+              <div class="cat-tile-icon">💳</div>
+              <div class="cat-tile-name">Billing Issue</div>
+            </div>
+            <div class="cat-tile" data-cat="Account Issue">
+              <div class="cat-tile-icon">👤</div>
+              <div class="cat-tile-name">Account Issue</div>
+            </div>
+            <div class="cat-tile" data-cat="Feature Request">
+              <div class="cat-tile-icon">✨</div>
+              <div class="cat-tile-name">Feature Request</div>
+            </div>
+            <div class="cat-tile" data-cat="General Inquiry">
+              <div class="cat-tile-icon">💬</div>
+              <div class="cat-tile-name">General Inquiry</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 6 — AI SUGGESTED RESPONSES
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-suggest">
+      <div class="glass-card neon-card">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-bulb"></i> AI Suggested Responses</div>
+          <span class="badge badge-purple">Agent Tool</span>
+        </div>
+        <div class="card-body">
+          <div class="suggest-form">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="sug-cat">
+                <option value="Technical Issue">Technical Issue</option>
+                <option value="Billing Issue">Billing Issue</option>
+                <option value="Account Issue">Account Issue</option>
+                <option value="Feature Request">Feature Request</option>
+                <option value="General Inquiry">General Inquiry</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sentiment</label>
+              <select class="form-select" id="sug-sent">
+                <option value="Positive">Positive</option>
+                <option value="Neutral" selected>Neutral</option>
+                <option value="Negative">Negative</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Context (optional)</label>
+              <input type="text" class="form-input" id="sug-context" placeholder="Ticket subject or brief context">
+            </div>
+            <div class="form-group">
+              <label class="form-label">&nbsp;</label>
+              <button class="btn btn-primary" id="suggest-btn">
+                <i class="ti ti-sparkles"></i> Generate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card neon-card" id="suggest-results" style="display:none;">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-message-check"></i> Generated Responses</div>
+          <button class="btn btn-ghost btn-sm" id="regen-btn">
+            <i class="ti ti-refresh"></i> Regenerate
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="suggest-cards" id="suggest-cards"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 7 — CONVERSATION HISTORY
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-history">
+      <div class="glass-card neon-card" style="padding:0;overflow:hidden;">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-history"></i> Conversation History</div>
+          <button class="btn btn-ghost btn-sm" id="refresh-history-btn">
+            <i class="ti ti-refresh"></i> Refresh
+          </button>
+        </div>
+        <div class="history-layout" style="padding:16px;gap:16px;">
+          <div class="history-list" id="history-list">
+            <div style="height:60px;border-radius:var(--radius-sm);" class="skeleton"></div>
+            <div style="height:60px;border-radius:var(--radius-sm);" class="skeleton"></div>
+            <div style="height:60px;border-radius:var(--radius-sm);" class="skeleton"></div>
+          </div>
+          <div class="history-detail" id="history-detail">
+            <div class="history-empty">
+              <i class="ti ti-message-off" style="font-size:40px;color:var(--border2);"></i>
+              Select a conversation to view messages
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANEL 8 — AI ANALYTICS
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-analytics">
+      <!-- Stat Row -->
+      <div class="grid-4" id="analytics-stats">
+        <div class="stat-card">
+          <div class="stat-icon teal"><i class="ti ti-messages"></i></div>
+          <div class="stat-label">Total Sessions</div>
+          <div class="stat-value teal" id="stat-sessions">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="ti ti-message-dots"></i></div>
+          <div class="stat-label">Total Messages</div>
+          <div class="stat-value cyan" id="stat-messages">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="ti ti-mood-check"></i></div>
+          <div class="stat-label">Analyzed Texts</div>
+          <div class="stat-value blue" id="stat-analyzed">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon pink"><i class="ti ti-brain"></i></div>
+          <div class="stat-label">AI Accuracy</div>
+          <div class="stat-value" style="color:var(--pink);">Gemini</div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <!-- Sentiment Donut -->
+        <div class="glass-card neon-card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-chart-donut"></i> Sentiment Distribution</div>
+          </div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <div class="donut-chart">
+                <svg width="180" height="180" viewBox="0 0 180 180">
+                  <circle cx="90" cy="90" r="70" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="24"/>
+                  <circle id="donut-pos" cx="90" cy="90" r="70" fill="none"
+                    stroke="#4ade80" stroke-width="24" stroke-dasharray="0 440" stroke-linecap="round"/>
+                  <circle id="donut-neu" cx="90" cy="90" r="70" fill="none"
+                    stroke="#38bdf8" stroke-width="24" stroke-dasharray="0 440" stroke-linecap="round"/>
+                  <circle id="donut-neg" cx="90" cy="90" r="70" fill="none"
+                    stroke="#f87171" stroke-width="24" stroke-dasharray="0 440" stroke-linecap="round"/>
+                </svg>
+                <div class="donut-center">
+                  <div class="donut-val" id="donut-total">0</div>
+                  <div class="donut-lbl">Total</div>
+                </div>
+              </div>
+              <div class="donut-legend">
+                <div class="legend-row">
+                  <div class="legend-dot" style="background:#4ade80;"></div>
+                  <span class="legend-label">Positive</span>
+                  <span class="legend-val" id="leg-pos">0</span>
+                </div>
+                <div class="legend-row">
+                  <div class="legend-dot" style="background:#38bdf8;"></div>
+                  <span class="legend-label">Neutral</span>
+                  <span class="legend-val" id="leg-neu">0</span>
+                </div>
+                <div class="legend-row">
+                  <div class="legend-dot" style="background:#f87171;"></div>
+                  <span class="legend-label">Negative</span>
+                  <span class="legend-val" id="leg-neg">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Bar Chart -->
+        <div class="glass-card neon-card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-chart-bar"></i> Ticket Categories</div>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart" id="category-bar-chart">
+              <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px;">
+                No categorization data yet. Try the Ticket Categorization panel.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card neon-card">
+        <div class="card-header">
+          <div class="card-title"><i class="ti ti-refresh"></i> Refresh Analytics</div>
+        </div>
+        <div class="card-body" style="display:flex;align-items:center;gap:14px;">
+          <button class="btn btn-primary" id="refresh-analytics-btn">
+            <i class="ti ti-refresh"></i> Reload Data
+          </button>
+          <span style="font-size:13px;color:var(--text2);">Data reflects all AI interactions stored in Firestore for your account.</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</main>
+</div><!-- /app-shell -->
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+/* ── Auth Guard ── */
+const _u = JSON.parse(localStorage.getItem("deskflow_user") || "null");
+if (!_u) { location.href = "signin.html"; }
+
+const USER = _u || {};
+const API = "http://localhost:5000";  // same-origin
+
+/* ── User UI ── */
+document.getElementById("user-name").textContent = USER.name || USER.email || "User";
+document.getElementById("user-avatar").textContent = (USER.name || "U")[0].toUpperCase();
+
+/* ── Back / Logout ── */
+document.getElementById("back-btn").addEventListener("click", () => {
+  const role = USER.role || "customer";
+  location.href = role === "agent" ? "agent.html" : role === "admin" ? "admin.html" : "dashboard.html";
+});
+document.getElementById("logout-btn").addEventListener("click", () => {
+  localStorage.removeItem("deskflow_user");
+  location.href = "signin.html";
+});
+
+/* ── Panel Navigation ── */
+const NAV_LABELS = {
+  chatbot:    "AI Chatbot Panel",
+  voice:      "Voice Assistant Panel",
+  faq:        "FAQ Search Panel",
+  sentiment:  "Sentiment Analysis Panel",
+  categorize: "Ticket Categorization Panel",
+  suggest:    "AI Suggested Responses Panel",
+  history:    "Conversation History Panel",
+  analytics:  "AI Analytics Panel"
+};
+const subtitle = document.getElementById("panel-subtitle");
+
+// panelNavLocked: true while voice mic is recording (prevents accidental nav away)
+let panelNavLocked = false;
+// currentPanelId: tracks which panel the user explicitly chose last
+let currentPanelId = "chatbot";
+
+document.querySelectorAll(".nav-item[data-panel]").forEach(item => {
+  item.addEventListener("click", () => {
+    // Block if voice is recording — user must stop mic first
+    if (panelNavLocked && item.dataset.panel !== "voice") return;
+
+    const targetId = item.dataset.panel;
+
+    // Stop any background voice activity when the user leaves voice panel
+    if (targetId !== "voice" && (isListening || isVoiceProcessing)) {
+      try { recognition?.stop(); } catch (_) {}
+      speechSynthesis.cancel();
+      isVoiceProcessing = false;
+      panelNavLocked    = false;
+      // Reset voice UI inline (stopListeningUI not yet defined here, call it safely)
+      const orbIcon = document.getElementById("voice-orb-icon");
+      if (orbIcon) orbIcon.className = "ti ti-microphone";
+      const startBtn = document.getElementById("start-voice-btn");
+      if (startBtn) startBtn.disabled = false;
+    }
+
+    currentPanelId = targetId;
+
+    document.querySelectorAll(".nav-item[data-panel]").forEach(n => n.classList.remove("active"));
+    item.classList.add("active");
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.getElementById("panel-" + targetId).classList.add("active");
+    subtitle.textContent = NAV_LABELS[targetId] || "";
+    if (targetId === "analytics") loadAnalytics();
+    if (targetId === "history")   loadHistory();
+    if (targetId === "faq")       loadFaqArticles();
+  });
+});
+
+/* ── Toast ── */
+function showToast(msg, type = "success") {
+  const div = document.createElement("div");
+  div.className = `toast ${type}`;
+  const icon = type === "success" ? "ti-check" : "ti-alert-triangle";
+  // Safe: icon is a known string, msg escaped via textContent on a span
+  const span = document.createElement("span");
+  span.textContent = " " + msg;
+  div.innerHTML = `<i class="ti ${icon}"></i>`;
+  div.appendChild(span);
+  document.getElementById("toast-container").appendChild(div);
+  setTimeout(() => div.remove(), 4000);
+}
+
+/* ── Animated Background Canvas ── */
+(function() {
+  const canvas = document.getElementById("bg-canvas");
+  const ctx = canvas.getContext("2d");
+  let W, H, particles = [];
+  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+  resize();
+  window.addEventListener("resize", resize);
+
+  function Particle() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = Math.random() * 1.5 + 0.3;
+    this.speed = Math.random() * 0.3 + 0.05;
+    this.opacity = Math.random() * 0.5 + 0.1;
+    this.dx = (Math.random() - 0.5) * 0.4;
+    this.dy = -this.speed;
+  }
+  Particle.prototype.update = function() {
+    this.x += this.dx;
+    this.y += this.dy;
+    if (this.y < -5) { this.y = H + 5; this.x = Math.random() * W; }
+  };
+
+  for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,212,199,${p.opacity})`;
+      ctx.fill();
+      p.update();
+    });
+
+    // Occasional neon streaks
+    if (Math.random() < 0.015) {
+      ctx.save();
+      ctx.strokeStyle = `rgba(0,245,255,0.06)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      const sx = Math.random() * W;
+      ctx.moveTo(sx, 0);
+      ctx.lineTo(sx + (Math.random()-0.5)*200, H);
+      ctx.stroke();
+      ctx.restore();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── Custom Cursor ── */
+(function() {
+  const cursor = document.getElementById("cursor");
+  const trail  = document.getElementById("cursor-trail");
+  let tx = 0, ty = 0;
+  document.addEventListener("mousemove", e => {
+    cursor.style.left = e.clientX + "px";
+    cursor.style.top  = e.clientY + "px";
+    tx = e.clientX; ty = e.clientY;
+  });
+  function animateTrail() {
+    const rx = parseFloat(trail.style.left) || 0;
+    const ry = parseFloat(trail.style.top)  || 0;
+    trail.style.left = (rx + (tx - rx) * 0.15) + "px";
+    trail.style.top  = (ry + (ty - ry) * 0.15) + "px";
+    requestAnimationFrame(animateTrail);
+  }
+  animateTrail();
+  document.querySelectorAll("button,a,.nav-item,.quick-action-btn,.faq-card,.history-item,.cat-tile").forEach(el => {
+    el.addEventListener("mouseenter", () => { cursor.style.width = "18px"; cursor.style.height = "18px"; });
+    el.addEventListener("mouseleave", () => { cursor.style.width = "10px"; cursor.style.height = "10px"; });
+  });
+})();
+
+/* ════════════════════════════════════════════════════════════
+   [FIX #5] SHARED CONVERSATION STATE
+   chatHistory and currentSessionId are shared by BOTH
+   typed chat and voice — so history and session persist
+   across all interaction modes.
+════════════════════════════════════════════════════════════ */
+let chatHistory      = [];   // [{role:"user"|"model", text, source, timestamp}]
+let currentSessionId = null; // shared by chat + voice
+let msgCount         = 1;
+
+/* ════════════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════════════ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function formatDate(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString() + " " +
+      d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  } catch { return iso; }
+}
+
+function scrollChatBottom() {
+  const box = document.getElementById("chat-messages");
+  box.scrollTop = box.scrollHeight;
+}
+
+// [FIX #2] appendBubble — renders immediately; source="voice" shows mic icon
+function appendBubble(role, text, source) {
+  const box     = document.getElementById("chat-messages");
+  const div     = document.createElement("div");
+  div.className = `chat-bubble ${role}`;
+  const timeStr = new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+
+  let senderHtml = "";
+  if (role === "ai") {
+    senderHtml = `<div class="bubble-sender"><i class="ti ti-robot"></i> Zia AI</div>`;
+  } else if (source === "voice") {
+    senderHtml = `<div class="bubble-sender" style="color:var(--cyan)"><i class="ti ti-microphone"></i> You (Voice)</div>`;
+  }
+
+  div.innerHTML = `${senderHtml}${escapeHtml(text)}<div class="bubble-meta"><span>${timeStr}${source === "voice" ? " · 🎤" : ""}</span></div>`;
+  box.appendChild(div);
+  scrollChatBottom();
+  return div;
+}
+
+/* ════════════════════════════════════════════════════════════
+   [FIX #5] UNIFIED AI CONVERSATION HANDLER
+   ALL AI interactions — typed or voice — go through here.
+   Fixes: shared history, shared session, correct payload,
+          immediate user bubble, full error handling, debug logs.
+════════════════════════════════════════════════════════════ */
+async function handleAIConversation(message, source) {
+  // source = "chat" | "voice"
+  message = (message || "").trim();
+  if (!message) { showToast("Please enter a message.", "error"); return null; }
+
+  console.log("━━━ handleAIConversation ━━━");
+  console.log("User Message:", message);
+  console.log("Source:", source);
+  console.log("Session:", currentSessionId);
+  console.log("History length (before this turn):", chatHistory.length);
+
+  // ── Human agent escalation intercept ──
+  // Catches "human", "agent", "talk to person", "connect me" etc.
+  if (/\bhuman\b|\bagent\b|\bperson\b|\bsupport team\b|\bescalate\b/i.test(message) ||
+      /connect me|speak to|talk to|real person|live (chat|agent|support)/i.test(message)) {
+    appendBubble("user", message, source);
+    chatHistory.push({ role: "user", text: message, source, timestamp: new Date().toISOString() });
+    msgCount++;
+    document.getElementById("msg-count").textContent = msgCount;
+
+    // Build a bubble with a clickable link — safe because we control the HTML
+    const box     = document.getElementById("chat-messages");
+    const div     = document.createElement("div");
+    div.className = "chat-bubble ai";
+    const t       = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    div.innerHTML = `<div class="bubble-sender"><i class="ti ti-robot"></i> Zia AI</div>
+I'll connect you with a human agent right away.<br><br>
+<strong>Option 1:</strong> Raise a support ticket from your dashboard — our agents respond within 2 hours.<br>
+<strong>Option 2:</strong> Call or email our support team directly from the Contact page.<br><br>
+<a href="dashboard.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:var(--teal);color:#050816;border-radius:8px;font-weight:700;text-decoration:none;font-size:13px;">
+  <i class="ti ti-ticket"></i>&nbsp;Open Ticket Dashboard
+</a>
+<div class="bubble-meta"><span>${t}</span></div>`;
+    box.appendChild(div);
+    scrollChatBottom();
+
+    const agentReply = "I'm connecting you with a human agent. Please open the Ticket Dashboard to raise a ticket.";
+    chatHistory.push({ role: "model", text: agentReply, source, timestamp: new Date().toISOString() });
+    return { reply: agentReply };
+  }
+
+  // ── STEP 1: Build payload from history BEFORE adding the current message ──
+  // Critical: chatHistory must NOT include the current user message here.
+  // Gemini history must be alternating user/model pairs with no trailing user.
+  const historySnapshot = chatHistory
+    .slice(-20)
+    .map(m => ({ role: m.role, text: m.text }));
+
+  const payload = {
+    message,
+    email:     USER.email || "",
+    history:   historySnapshot,   // prior conversation only — no current msg
+    sessionId: currentSessionId
+  };
+
+  console.log("API Request payload:", JSON.stringify(payload, null, 2));
+
+  // ── STEP 2: Render user bubble + update local state (after payload is built) ──
+  appendBubble("user", message, source);
+  chatHistory.push({ role: "user", text: message, source, timestamp: new Date().toISOString() });
+  msgCount++;
+  document.getElementById("msg-count").textContent = msgCount;
+  document.getElementById("chat-typing").style.display = "flex";
+  scrollChatBottom();
+
+  // ── STEP 3: Send to backend ──
+  try {
+    const res = await fetch(`${API}/api/ai/chat`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+
+    let data;
+    try { data = await res.json(); }
+    catch (je) { throw new Error("Invalid JSON from server: " + je.message); }
+
+    console.log("API Response:", data);
+    document.getElementById("chat-typing").style.display = "none";
+
+    const reply = (data.reply && data.reply.trim()) ? data.reply.trim() : null;
+    if (!reply) throw new Error("Empty reply from server");
+
+    // ── STEP 4: Render AI bubble + update local state ──
+    appendBubble("ai", reply, source);
+    chatHistory.push({ role: "model", text: reply, source, timestamp: new Date().toISOString() });
+    msgCount++;
+    document.getElementById("msg-count").textContent = msgCount;
+
+    if (data.sessionId) {
+      currentSessionId = data.sessionId;
+      console.log("Session updated:", currentSessionId);
+      document.getElementById("chat-session-badge").textContent =
+        "Session #" + data.sessionId.slice(-6).toUpperCase();
+    }
+
+    document.getElementById("ai-mode-lbl").textContent =
+      data.source === "gemini" ? "Gemini AI" : "Fallback";
+
+    document.getElementById("tts-text").value = reply;
+
+    return { reply, sessionId: data.sessionId, source: data.source };
+
+  } catch (err) {
+    document.getElementById("chat-typing").style.display = "none";
+    console.error("handleAIConversation error:", err.message);
+
+    let errorMsg = "Connection error — make sure the backend is running on port 5000.";
+    if (err.message.includes("HTTP 5"))          errorMsg = "Server error: " + err.message;
+    if (err.message.includes("Empty reply"))     errorMsg = "AI returned no response. Please retry.";
+    if (err.message.includes("JSON"))            errorMsg = "Server returned invalid data. Please retry.";
+    if (err.message.includes("Failed to fetch")) errorMsg = "Network error — backend unreachable on port 5000.";
+
+    appendBubble("ai", errorMsg, null);
+    showToast(errorMsg, "error");
+    return null;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   PANEL 1 — AI CHATBOT
+════════════════════════════════════════════════════════════ */
+// [FIX #5] sendChat delegates to unified handler
+async function sendChat(message) {
+  message = (message || "").trim();
+  if (!message) return;
+  await handleAIConversation(message, "chat");
+}
+
+document.getElementById("send-chat-btn").addEventListener("click", () => {
+  const inp = document.getElementById("chat-input");
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = "";      // clear before sendChat to prevent double-sends
+  sendChat(msg);
+});
+
+document.getElementById("chat-input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const inp = e.target;
+    const msg = inp.value.trim();
+    if (!msg) return;
+    inp.value = "";
+    sendChat(msg);
+  }
+});
+
+document.getElementById("clear-chat-btn").addEventListener("click", () => {
+  document.getElementById("chat-messages").innerHTML = `
+    <div class="chat-bubble ai">
+      <div class="bubble-sender"><i class="ti ti-robot"></i> Zia AI</div>
+      Chat cleared. How can I help you?
+      <div class="bubble-meta"><span>Just now</span></div>
+    </div>`;
+  chatHistory      = [];
+  currentSessionId = null;
+  msgCount         = 1;
+  document.getElementById("msg-count").textContent         = "1";
+  document.getElementById("chat-session-badge").textContent = "New Session";
+  document.getElementById("tts-text").value                = "";
+  console.log("Chat cleared — session reset.");
+});
+
+document.getElementById("new-session-btn").addEventListener("click", () => {
+  document.getElementById("clear-chat-btn").click();
+  showToast("New session started", "success");
+});
+
+// [FIX #5] quickAsk uses unified handler — maintains shared history
+function quickAsk(msg) {
+  if (!msg || !msg.trim()) return;
+  document.querySelector("[data-panel='chatbot']").click();
+  setTimeout(() => handleAIConversation(msg.trim(), "chat"), 80);
+}
+
+/* ═══════════════════════════════════════════
+   PANEL 2 — VOICE ASSISTANT
+═══════════════════════════════════════════ */
+let recognition = null;
+let isListening = false;
+let isVoiceProcessing = false;   // prevents onend from resetting UI mid-fetch
+let voiceFinalText = "";         // accumulates final transcript across result events
+
+// Generate waveform bars
+(function() {
+  const wf = document.getElementById("voice-waveform");
+  for (let i = 0; i < 32; i++) {
+    const bar = document.createElement("div");
+    bar.className = "wave-bar";
+    bar.style.height = (Math.random() * 20 + 4) + "px";
+    bar.style.animationDelay = (i * 0.05) + "s";
+    wf.appendChild(bar);
+  }
+})();
+
+// Populate TTS voices — sort language-matching voices to the top
+function loadVoices() {
+  const sel = document.getElementById("voice-select");
+  const langCode = (document.getElementById("voice-lang-select")?.value || "en-US").split("-")[0];
+  sel.innerHTML = "";
+  const voices = speechSynthesis.getVoices();
+  const preferred = voices.filter(v => v.lang.startsWith(langCode));
+  const rest      = voices.filter(v => !v.lang.startsWith(langCode));
+  [...preferred, ...rest].forEach((v, i) => {
+    const realIdx = voices.indexOf(v);
+    const opt = document.createElement("option");
+    opt.value = realIdx;
+    opt.textContent = `${v.name} (${v.lang})${preferred.includes(v) ? " ★" : ""}`;
+    sel.appendChild(opt);
+  });
+}
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+document.getElementById("rate-slider").addEventListener("input", function() {
+  document.getElementById("rate-val").textContent = parseFloat(this.value).toFixed(1);
+});
+
+// Force voice panel active — but only if the user is still on the voice panel.
+// This prevents background voice processing from hijacking any other panel.
+function activateVoicePanel() {
+  if (currentPanelId !== "voice") return;
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-voice").classList.add("active");
+  document.querySelectorAll(".nav-item[data-panel]").forEach(n => n.classList.remove("active"));
+  document.querySelector("[data-panel='voice']").classList.add("active");
+  subtitle.textContent = "Voice Assistant Panel";
+}
+
+function startListening() {
+  if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    showToast("Speech Recognition not supported. Please use Google Chrome.", "error");
+    return;
+  }
+  if (isListening || isVoiceProcessing) return;
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  // Use selected language (English / Hindi / Tamil)
+  recognition.lang = document.getElementById("voice-lang-select")?.value || "en-US";
+
+  voiceFinalText = "";
+
+  recognition.onstart = () => {
+    isListening    = true;
+    panelNavLocked = true;
+    currentPanelId = "voice";   // ensure panel state is in sync when mic starts
+    document.getElementById("voice-orb").classList.add("listening");
+    document.getElementById("voice-status-text").textContent  = "Listening… speak now";
+    document.getElementById("voice-status-badge").textContent = "Listening";
+    document.getElementById("voice-transcript").textContent   = "Speak now…";
+    document.getElementById("start-voice-btn").disabled = true;
+    document.getElementById("stop-voice-btn").disabled  = false;
+    document.getElementById("voice-orb-icon").className = "ti ti-wave-sine";
+    console.log("STT started — lang:", recognition.lang);
+  };
+
+  recognition.onresult = e => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        voiceFinalText += e.results[i][0].transcript;
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById("voice-transcript").textContent =
+      voiceFinalText + (interim ? " " + interim : "");
+    console.log("STT interim:", interim, "| final:", voiceFinalText);
+  };
+
+  recognition.onerror = e => {
+    console.error("STT error:", e.error);
+    isListening    = false;
+    isVoiceProcessing = false;
+    panelNavLocked = false;
+    stopListeningUI();
+    if (e.error === "not-allowed") {
+      showToast("Microphone denied — allow mic access in browser settings.", "error");
+    } else if (e.error !== "aborted") {
+      showToast("Voice error: " + e.error, "error");
+    }
+  };
+
+  // [FIX #4] onend fires when mic closes — only process if not already mid-fetch
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById("voice-orb").classList.remove("listening");
+    document.getElementById("voice-orb-icon").className  = "ti ti-microphone";
+    document.getElementById("stop-voice-btn").disabled   = true;
+    console.log("STT ended — final text:", voiceFinalText);
+
+    if (voiceFinalText.trim() && !isVoiceProcessing) {
+      processVoiceInput(voiceFinalText.trim());
+    } else if (!isVoiceProcessing) {
+      panelNavLocked = false;
+      stopListeningUI();
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch (err) {
+    panelNavLocked = false;
+    showToast("Could not start microphone: " + err.message, "error");
+  }
+}
+
+function stopListeningUI() {
+  isListening       = false;
+  isVoiceProcessing = false;
+  voiceFinalText    = "";
+  panelNavLocked    = false;
+  document.getElementById("voice-orb").classList.remove("listening");
+  document.getElementById("voice-orb-icon").className     = "ti ti-microphone";
+  document.getElementById("voice-status-text").textContent  = "Tap to speak";
+  document.getElementById("voice-status-badge").textContent = "Idle";
+  document.getElementById("start-voice-btn").disabled = false;
+  document.getElementById("stop-voice-btn").disabled  = true;
+}
+
+// processVoiceInput — uses unified handleAIConversation.
+// User speech appears as a chat bubble; AI reply appears in chat + voice card + TTS.
+async function processVoiceInput(text) {
+  isVoiceProcessing = true;
+  panelNavLocked    = true;
+
+  document.getElementById("voice-status-text").textContent  = "Sending to Gemini AI…";
+  document.getElementById("voice-status-badge").textContent = "Processing";
+  document.getElementById("start-voice-btn").disabled = true;
+
+  console.log("Voice input →", text);
+
+  // Stay on voice panel before async call
+  activateVoicePanel();
+
+  // Unified handler — appends user + AI bubbles to chat,
+  // uses shared chatHistory and currentSessionId
+  const result = await handleAIConversation(text, "voice");
+
+  // Restore voice panel after await (browser may have shifted focus)
+  activateVoicePanel();
+
+  if (!result) {
+    // Error displayed inside handleAIConversation
+    isVoiceProcessing = false;
+    panelNavLocked    = false;
+    stopListeningUI();
+    document.getElementById("voice-status-text").textContent  = "Error — try again.";
+    document.getElementById("voice-status-badge").textContent = "Idle";
+    return;
+  }
+
+  const reply = result.reply;
+
+  // Unlock nav now — don't hold the user hostage during TTS playback
+  isVoiceProcessing = false;
+  panelNavLocked    = false;
+  document.getElementById("start-voice-btn").disabled = false;
+
+  // Always update tts-text so the user can manually replay later
+  document.getElementById("tts-text").value = reply;
+
+  if (currentPanelId === "voice") {
+    // User is still on voice panel — show card and speak
+    document.getElementById("voice-ai-response").textContent = reply;
+    document.getElementById("voice-response-card").style.display = "block";
+    document.getElementById("voice-status-text").textContent  = "Speaking response…";
+    document.getElementById("voice-status-badge").textContent = "Speaking";
+
+    console.log("Starting TTS — response:", reply.substring(0, 60));
+
+    speakText(reply, () => {
+      document.getElementById("voice-status-text").textContent  = "Done. Tap orb to speak again.";
+      document.getElementById("voice-status-badge").textContent = "Idle";
+      console.log("TTS complete.");
+    });
+  } else {
+    // User navigated away while AI was responding — show a toast,
+    // don't switch panels or auto-play audio
+    showToast("Voice response ready — check the Voice Assistant panel.", "success");
+    console.log("Voice response ready but user is on panel:", currentPanelId);
+  }
+}
+
+// speakText accepts an optional onEndCallback so the caller knows when TTS finishes
+function speakText(text, onEndCallback) {
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+
+  const selectedLang = document.getElementById("voice-lang-select")?.value || "en-US";
+  const langCode = selectedLang.split("-")[0];
+  const voices = speechSynthesis.getVoices();
+
+  // Prefer a voice that matches the selected language
+  const selIdxRaw = document.getElementById("voice-select").value;
+  const selectedVoice = voices[parseInt(selIdxRaw)];
+  const langVoice = voices.find(v => v.lang.startsWith(langCode));
+
+  if (selectedVoice && selectedVoice.lang.startsWith(langCode)) {
+    utt.voice = selectedVoice;
+  } else if (langVoice) {
+    utt.voice = langVoice;
+  } else if (selectedVoice) {
+    utt.voice = selectedVoice;
+  }
+
+  utt.lang = selectedLang;
+  utt.rate = parseFloat(document.getElementById("rate-slider").value) || 1;
+
+  utt.onend = () => {
+    if (typeof onEndCallback === "function") onEndCallback();
+  };
+  utt.onerror = () => {
+    if (typeof onEndCallback === "function") onEndCallback();
+  };
+
+  speechSynthesis.speak(utt);
+}
+
+document.getElementById("start-voice-btn").addEventListener("click", startListening);
+document.getElementById("voice-orb").addEventListener("click", () => {
+  if (isVoiceProcessing) return;
+  isListening ? recognition?.stop() : startListening();
+});
+document.getElementById("stop-voice-btn").addEventListener("click", () => {
+  recognition?.stop();
+  if (isVoiceProcessing) {
+    speechSynthesis.cancel();
+    isVoiceProcessing = false;
+    panelNavLocked    = false;
+    stopListeningUI();
+  }
+});
+document.getElementById("speak-btn").addEventListener("click", () => {
+  const t = document.getElementById("tts-text").value.trim();
+  if (t) speakText(t); else showToast("No text to speak.", "error");
+});
+document.getElementById("stop-tts-btn").addEventListener("click", () => {
+  speechSynthesis.cancel();
+  document.getElementById("voice-status-badge").textContent = "Idle";
+});
+
+/* ── Mic button inside chat input bar ── */
+let chatMicActive = false;
+let chatMicRecognition = null;
+
+document.getElementById("voice-chat-btn").addEventListener("click", function() {
+  // Toggle: click again to stop
+  if (chatMicActive) {
+    chatMicRecognition?.stop();
+    return;
+  }
+
+  if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    showToast("Speech Recognition not supported. Please use Google Chrome.", "error");
+    return;
+  }
+
+  const btn = this;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  chatMicRecognition = new SR();
+  chatMicRecognition.continuous = false;
+  chatMicRecognition.interimResults = true;
+  chatMicRecognition.lang = document.getElementById("voice-lang-select")?.value || "en-US";
+
+  chatMicActive = true;
+  btn.innerHTML = '<i class="ti ti-loader ti-spin"></i>';
+  btn.style.color = "var(--cyan)";
+  btn.style.borderColor = "var(--cyan)";
+  btn.style.boxShadow = "0 0 10px rgba(0,245,255,0.3)";
+  showToast("Listening… speak your message", "success");
+
+  let liveTranscript = "";
+
+  chatMicRecognition.onresult = function(e) {
+    liveTranscript = "";
+    for (let i = 0; i < e.results.length; i++) {
+      liveTranscript += e.results[i][0].transcript;
+    }
+    document.getElementById("chat-input").value = liveTranscript;
+  };
+
+  chatMicRecognition.onerror = function(e) {
+    chatMicActive = false;
+    btn.innerHTML = '<i class="ti ti-microphone"></i>';
+    btn.style.color = "";
+    btn.style.borderColor = "";
+    btn.style.boxShadow = "";
+    if (e.error === "not-allowed") {
+      showToast("Mic access denied. Allow microphone in browser settings.", "error");
+    } else if (e.error !== "aborted") {
+      showToast("Mic error: " + e.error + ". Try again.", "error");
+    }
+  };
+
+  // [FIX #5] Chat mic uses unified handler — shares history with voice panel
+  chatMicRecognition.onend = function() {
+    chatMicActive         = false;
+    btn.innerHTML         = '<i class="ti ti-microphone"></i>';
+    btn.style.color       = "";
+    btn.style.borderColor = "";
+    btn.style.boxShadow   = "";
+    const inp      = document.getElementById("chat-input");
+    const finalTxt = inp.value.trim();
+    if (finalTxt) {
+      inp.value = "";
+      handleAIConversation(finalTxt, "chat");
+    }
+  };
+
+  try {
+    chatMicRecognition.start();
+  } catch (err) {
+    chatMicActive = false;
+    btn.innerHTML = '<i class="ti ti-microphone"></i>';
+    btn.style.color = "";
+    btn.style.borderColor = "";
+    btn.style.boxShadow = "";
+    showToast("Could not start microphone. Check browser permissions.", "error");
+  }
+});
+
+/* ═══════════════════════════════════════════
+   PANEL 3 — FAQ SEARCH
+═══════════════════════════════════════════ */
+let kbArticles = [];
+
+async function loadFaqArticles() {
+  try {
+    const res = await fetch(`${API}/api/kb`);
+    const data = await res.json();
+    kbArticles = Array.isArray(data) ? data : (data.articles || []);
+    renderFaqGrid(kbArticles);
+  } catch (e) {
+    document.getElementById("faq-grid").innerHTML = `<div style="color:var(--text3);font-size:13px;">Could not load KB articles.</div>`;
+  }
+}
+
+function renderFaqGrid(articles) {
+  const grid = document.getElementById("faq-grid");
+  if (!articles.length) {
+    grid.innerHTML = `<div style="color:var(--text3);font-size:13px;">No articles found.</div>`;
+    return;
+  }
+  grid.innerHTML = articles.map(a => `
+    <div class="faq-card" onclick="quickAsk('${escapeHtml(a.question || '')}')">
+      <div class="faq-q">${escapeHtml(a.question || '')}</div>
+      <div class="faq-a">${escapeHtml((a.answer || '').substring(0, 100))}…</div>
+      <span class="faq-tag badge badge-teal">${escapeHtml(a.category || '')}</span>
+    </div>
+  `).join("");
+}
+
+async function searchFaq(query) {
+  const aiBox = document.getElementById("faq-ai-answer");
+  const aiText = document.getElementById("faq-ai-text");
+  aiBox.style.display = "block";
+  aiText.textContent = "Searching…";
+
+  try {
+    const res = await fetch(`${API}/api/ai/faq-search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query })
+    });
+    const data = await res.json();
+    aiText.textContent = data.answer || "No specific answer found. Please contact support.";
+
+    // Filter displayed articles
+    const filtered = kbArticles.filter(a =>
+      (a.question + " " + a.answer + " " + a.category).toLowerCase().includes(query.toLowerCase())
+    );
+    renderFaqGrid(filtered.length ? filtered : kbArticles);
+  } catch (e) {
+    aiText.textContent = "Could not reach AI service. Showing all articles.";
+  }
+}
+
+document.getElementById("faq-search-btn").addEventListener("click", () => {
+  const q = document.getElementById("faq-input").value.trim();
+  if (q) searchFaq(q); else loadFaqArticles();
+});
+document.getElementById("faq-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("faq-search-btn").click();
+});
+
+/* ═══════════════════════════════════════════
+   PANEL 4 — SENTIMENT ANALYSIS
+═══════════════════════════════════════════ */
+const sentTotals = { Positive: 0, Neutral: 0, Negative: 0 };
+
+async function analyzeSentiment(text) {
+  document.getElementById("sent-emoji").textContent = "⏳";
+  document.getElementById("sent-label").textContent = "Analyzing…";
+  document.getElementById("sent-label").className = "sentiment-label-big";
+
+  try {
+    const res = await fetch(`${API}/api/ai/sentiment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, email: USER.email })
+    });
+    const data = await res.json();
+
+    document.getElementById("sent-emoji").textContent = data.emoji || "😐";
+    document.getElementById("sent-label").textContent = data.sentiment || "Neutral";
+    document.getElementById("sent-label").className = `sentiment-label-big ${data.sentiment}`;
+    document.getElementById("sent-score").textContent = `${data.score || 0}%`;
+    document.getElementById("sent-bar").style.width = `${data.score || 0}%`;
+    document.getElementById("sent-explanation").textContent = data.explanation || "";
+
+    // Update totals
+    if (data.sentiment in sentTotals) sentTotals[data.sentiment]++;
+    updateSentBars();
+    showToast(`Sentiment: ${data.sentiment}`, "success");
+  } catch (e) {
+    showToast("Sentiment analysis failed.", "error");
+    document.getElementById("sent-emoji").textContent = "❌";
+    document.getElementById("sent-label").textContent = "Error";
+  }
+}
+
+function updateSentBars() {
+  const total = sentTotals.Positive + sentTotals.Neutral + sentTotals.Negative || 1;
+  document.getElementById("pos-bar").style.width = `${(sentTotals.Positive/total)*100}%`;
+  document.getElementById("neu-bar").style.width = `${(sentTotals.Neutral/total)*100}%`;
+  document.getElementById("neg-bar").style.width = `${(sentTotals.Negative/total)*100}%`;
+  document.getElementById("pos-count").textContent = sentTotals.Positive;
+  document.getElementById("neu-count").textContent = sentTotals.Neutral;
+  document.getElementById("neg-count").textContent = sentTotals.Negative;
+}
+
+document.getElementById("analyze-btn").addEventListener("click", () => {
+  const t = document.getElementById("sentiment-input").value.trim();
+  if (t) analyzeSentiment(t); else showToast("Please enter a message to analyze.", "error");
+});
+
+function quickSentiment(msg) {
+  document.getElementById("sentiment-input").value = msg;
+  analyzeSentiment(msg);
+  document.querySelector("[data-panel='sentiment']").click();
+}
+
+/* ═══════════════════════════════════════════
+   PANEL 5 — TICKET CATEGORIZATION
+═══════════════════════════════════════════ */
+const CAT_META = {
+  "Technical Issue":  { emoji: "🔧", cls: "badge-blue",   bg: "rgba(56,189,248,0.12)",  color: "#38bdf8" },
+  "Billing Issue":    { emoji: "💳", cls: "badge-yellow", bg: "rgba(251,191,36,0.12)",  color: "#fbbf24" },
+  "Account Issue":    { emoji: "👤", cls: "badge-purple", bg: "rgba(167,139,250,0.12)", color: "#a78bfa" },
+  "Feature Request":  { emoji: "✨", cls: "badge-teal",   bg: "rgba(0,212,199,0.12)",   color: "#00D4C7" },
+  "General Inquiry":  { emoji: "💬", cls: "badge-green",  bg: "rgba(34,197,94,0.12)",   color: "#4ade80" }
+};
+
+async function categorizeTicket() {
+  const subject = document.getElementById("cat-subject").value.trim();
+  const desc    = document.getElementById("cat-desc").value.trim();
+  if (!subject && !desc) { showToast("Please enter a subject or description.", "error"); return; }
+
+  document.getElementById("categorize-btn").disabled = true;
+  document.getElementById("categorize-btn").innerHTML = '<i class="ti ti-loader ti-spin"></i> Classifying…';
+
+  try {
+    const res = await fetch(`${API}/api/ai/categorize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject, description: desc, email: USER.email })
+    });
+    const data = await res.json();
+    const meta = CAT_META[data.category] || CAT_META["General Inquiry"];
+
+    const resultEl = document.getElementById("cat-result");
+    resultEl.className = "cat-result-card glass-card neon-card show";
+    resultEl.style.background = meta.bg;
+    resultEl.innerHTML = `
+      <div class="cat-icon-big" style="background:${meta.bg};color:${meta.color};">
+        ${meta.emoji}
+      </div>
+      <div class="cat-info">
+        <h3 style="color:${meta.color};">${data.category}</h3>
+        <p>${data.reason || "Classified by AI"}</p>
+      </div>
+      <div class="confidence-pill">${data.confidence || 0}% confidence</div>
+    `;
+
+    // Highlight tile
+    document.querySelectorAll(".cat-tile").forEach(t => {
+      t.classList.toggle("highlight", t.dataset.cat === data.category);
+    });
+
+    showToast(`Categorized as: ${data.category}`, "success");
+  } catch (e) {
+    showToast("Categorization failed.", "error");
+  } finally {
+    document.getElementById("categorize-btn").disabled = false;
+    document.getElementById("categorize-btn").innerHTML = '<i class="ti ti-tags"></i> Categorize Ticket';
+  }
+}
+
+document.getElementById("categorize-btn").addEventListener("click", categorizeTicket);
+
+/* ═══════════════════════════════════════════
+   PANEL 6 — SUGGESTED RESPONSES
+═══════════════════════════════════════════ */
+async function generateSuggestions() {
+  const category = document.getElementById("sug-cat").value;
+  const sentiment = document.getElementById("sug-sent").value;
+  const context   = document.getElementById("sug-context").value.trim();
+
+  document.getElementById("suggest-btn").disabled = true;
+  document.getElementById("suggest-btn").innerHTML = '<i class="ti ti-loader ti-spin"></i> Generating…';
+
+  try {
+    const res = await fetch(`${API}/api/ai/suggest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category, sentiment, subject: context, description: "" })
+    });
+    const data = await res.json();
+    const suggestions = data.suggestions || [];
+
+    document.getElementById("suggest-results").style.display = "block";
+    document.getElementById("suggest-cards").innerHTML = suggestions.map((s, i) => `
+      <div class="suggest-card">
+        <div class="suggest-num">${i + 1}</div>
+        <div class="suggest-text">${escapeHtml(s)}</div>
+        <div class="suggest-actions">
+          <button class="copy-btn" onclick="copyText('${escapeHtml(s).replace(/'/g, "\\'")}')">
+            <i class="ti ti-copy"></i> Copy
+          </button>
+          <button class="copy-btn" onclick="sendToChat('${escapeHtml(s).replace(/'/g, "\\'")}')">
+            <i class="ti ti-send"></i> Send to Chat
+          </button>
+        </div>
+      </div>
+    `).join("") || `<div style="color:var(--text3);font-size:13px;">No suggestions generated.</div>`;
+
+    showToast("Responses generated successfully!", "success");
+  } catch (e) {
+    showToast("Could not generate suggestions.", "error");
+  } finally {
+    document.getElementById("suggest-btn").disabled = false;
+    document.getElementById("suggest-btn").innerHTML = '<i class="ti ti-sparkles"></i> Generate';
+  }
+}
+
+document.getElementById("suggest-btn").addEventListener("click", generateSuggestions);
+document.getElementById("regen-btn").addEventListener("click", generateSuggestions);
+
+function copyText(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => showToast("Copied to clipboard!", "success"))
+    .catch(() => showToast("Could not copy.", "error"));
+}
+// [FIX #5] sendToChat uses unified handler — shares history/session
+function sendToChat(text) {
+  document.querySelector("[data-panel='chatbot']").click();
+  setTimeout(() => handleAIConversation(text, "chat"), 80);
+}
+
+/* ═══════════════════════════════════════════
+   PANEL 7 — CONVERSATION HISTORY
+═══════════════════════════════════════════ */
+async function loadHistory() {
+  if (!USER.email) return;
+  const list = document.getElementById("history-list");
+  list.innerHTML = `<div style="height:60px;border-radius:var(--radius-sm);" class="skeleton"></div>`.repeat(3);
+
+  try {
+    const res = await fetch(`${API}/api/ai/history?email=${encodeURIComponent(USER.email)}`);
+    const data = await res.json();
+    const sessions = data.sessions || [];
+
+    if (!sessions.length) {
+      list.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:14px;">No conversations yet. Start chatting!</div>`;
+      return;
+    }
+
+    list.innerHTML = sessions.map((s, i) => `
+      <div class="history-item" data-sid="${s.sessionId}" onclick="loadSessionDetail('${s.sessionId}', this)">
+        <div class="hist-preview">${escapeHtml(s.preview || "No preview")}</div>
+        <div class="hist-meta">
+          <span>${s.messageCount || 0} messages</span>
+          <span>${formatDate(s.updatedAt)}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch (e) {
+    list.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:14px;">Could not load history.</div>`;
+  }
+}
+
+async function loadSessionDetail(sid, el) {
+  document.querySelectorAll(".history-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+
+  const detail = document.getElementById("history-detail");
+  detail.innerHTML = `<div style="color:var(--text2);font-size:13px;padding:14px;">Loading messages…</div>`;
+
+  try {
+    const res = await fetch(`${API}/api/ai/history/${sid}`);
+    const data = await res.json();
+    const msgs = data.messages || [];
+
+    if (!msgs.length) {
+      detail.innerHTML = `<div class="history-empty">No messages in this session.</div>`;
+      return;
+    }
+
+    detail.innerHTML = msgs.map(m => `
+      <div class="chat-bubble ${m.role === 'user' ? 'user' : 'ai'}" style="max-width:85%;">
+        ${m.role !== 'user' ? '<div class="bubble-sender"><i class="ti ti-robot"></i> Zia AI</div>' : ''}
+        ${escapeHtml(m.text || '')}
+        <div class="bubble-meta"><span>${formatDate(m.timestamp)}</span></div>
+      </div>
+    `).join("");
+    detail.scrollTop = detail.scrollHeight;
+  } catch (e) {
+    detail.innerHTML = `<div class="history-empty">Could not load session.</div>`;
+  }
+}
+
+document.getElementById("refresh-history-btn").addEventListener("click", loadHistory);
+
+/* ═══════════════════════════════════════════
+   PANEL 8 — AI ANALYTICS
+═══════════════════════════════════════════ */
+async function loadAnalytics() {
+  try {
+    const url = USER.email
+      ? `${API}/api/ai/analytics?email=${encodeURIComponent(USER.email)}`
+      : `${API}/api/ai/analytics`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    document.getElementById("stat-sessions").textContent  = data.totalSessions  || 0;
+    document.getElementById("stat-messages").textContent  = data.totalMessages  || 0;
+    document.getElementById("stat-analyzed").textContent  = data.totalAnalyzed  || 0;
+
+    // Sentiment donut
+    const sent = data.sentimentBreakdown || { Positive: 0, Neutral: 0, Negative: 0 };
+    const total = (sent.Positive + sent.Neutral + sent.Negative) || 1;
+    const circ  = 2 * Math.PI * 70; // 439.8
+
+    const posArc = (sent.Positive / total) * circ;
+    const neuArc = (sent.Neutral  / total) * circ;
+    const negArc = (sent.Negative / total) * circ;
+
+    document.getElementById("donut-pos").setAttribute("stroke-dasharray", `${posArc} ${circ}`);
+    document.getElementById("donut-pos").setAttribute("stroke-dashoffset", "0");
+
+    document.getElementById("donut-neu").setAttribute("stroke-dasharray", `${neuArc} ${circ}`);
+    document.getElementById("donut-neu").setAttribute("stroke-dashoffset", -posArc);
+
+    document.getElementById("donut-neg").setAttribute("stroke-dasharray", `${negArc} ${circ}`);
+    document.getElementById("donut-neg").setAttribute("stroke-dashoffset", -(posArc + neuArc));
+
+    document.getElementById("donut-total").textContent = total === 1 ? 0 : total - 1;
+    document.getElementById("leg-pos").textContent = sent.Positive;
+    document.getElementById("leg-neu").textContent = sent.Neutral;
+    document.getElementById("leg-neg").textContent = sent.Negative;
+
+    // Category bar chart
+    const cats = data.categoryBreakdown || {};
+    const catNames = Object.keys(cats);
+    const barChart = document.getElementById("category-bar-chart");
+    if (!catNames.length) {
+      barChart.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px;">No categorization data yet.</div>`;
+    } else {
+      const maxVal = Math.max(...Object.values(cats)) || 1;
+      barChart.innerHTML = catNames.map(cat => `
+        <div class="bar-row">
+          <div class="bar-row-label">${cat}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${Math.round((cats[cat]/maxVal)*100)}%;">
+              ${cats[cat]}
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+  } catch (e) {
+    showToast("Could not load analytics.", "error");
+  }
+}
+
+document.getElementById("refresh-analytics-btn").addEventListener("click", loadAnalytics);
+
+</script>
+</body>
+</html>

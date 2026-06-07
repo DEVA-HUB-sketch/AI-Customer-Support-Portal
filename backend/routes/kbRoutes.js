@@ -1,7 +1,8 @@
 // backend/routes/kbRoutes.js
 const express = require("express");
-const router = express.Router();
-const { db } = require("../config/firebase");
+const router  = express.Router();
+const { db }  = require("../config/firebase");
+const { log, ACTIONS } = require("../services/activityLogger");
 
 // Get all KB articles / FAQs
 router.get("/", async (req, res) => {
@@ -44,6 +45,41 @@ router.get("/categories", async (req, res) => {
       }
     });
     res.json(Array.from(categories));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST /api/kb - Add a new KB article (admin)
+router.post("/", async (req, res) => {
+  try {
+    const { question, answer, category } = req.body;
+    if (!question || !answer || !category) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+    const docRef = await db.collection("kb").add({
+      question,
+      answer,
+      category,
+      createdAt: new Date().toISOString()
+    });
+    log({ userId: req.body.addedBy || "admin", email: req.body.addedBy || "admin", role: "admin",
+          action: ACTIONS.KB_ARTICLE_ADDED,
+          details: { question, category }, ip: req.clientIp });
+    res.status(201).json({ message: "Article added", id: docRef.id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE /api/kb/:id - Delete a KB article (admin)
+router.delete("/:id", async (req, res) => {
+  try {
+    await db.collection("kb").doc(req.params.id).delete();
+    log({ userId: req.query.deletedBy || "admin", email: req.query.deletedBy || "admin", role: "admin",
+          action: ACTIONS.KB_ARTICLE_DELETED,
+          details: { articleId: req.params.id }, ip: req.clientIp });
+    res.json({ message: "Article deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
