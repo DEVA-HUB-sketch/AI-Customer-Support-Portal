@@ -8,29 +8,72 @@ let db;
 let auth;
 let isMock = false;
 
-// Check if Firebase Service Account exists and is configured
+// ── Load and initialize Firebase Admin SDK ──────────────────────────────────
 if (fs.existsSync(serviceAccountPath)) {
   try {
-    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
-    // Normalize private key newlines (Windows/OneDrive can corrupt \n escapes)
+    const raw          = fs.readFileSync(serviceAccountPath, "utf8");
+    const serviceAccount = JSON.parse(raw);
+
+    // Normalize private key — handles any level of newline escaping
+    // (OneDrive on Windows can produce \n, \\n, or real newlines interchangeably)
     if (serviceAccount.private_key) {
-      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+      let pk = serviceAccount.private_key;
+      // Replace any run of backslashes followed by 'n' → real newline
+      pk = pk.replace(/\\+n/g, "\n");
+      // Also clean up carriage returns
+      pk = pk.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+      serviceAccount.private_key = pk;
     }
-    // Initialize standard Firebase Admin SDK
+
+    // Guard: only initialize once (handles hot-reload / module cache)
     if (admin.apps.length === 0) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
       });
     }
-    db = admin.firestore();
+
+    db   = admin.firestore();
     auth = admin.auth();
     console.log("Firebase Admin SDK Initialized Successfully.");
+    console.log(`  Project : ${serviceAccount.project_id}`);
+    console.log(`  Account : ${serviceAccount.client_email}`);
+
+    // ── Live connectivity test — catches revoked/rotated keys early ──────────
+    // Run async so it doesn't block the module load; logs a warning if it fails
+    setImmediate(async () => {
+      try {
+        await db.collection("_ping_").limit(1).get();
+        console.log("  Firestore connectivity : OK");
+      } catch (pingErr) {
+        const code = pingErr.code || "";
+        if (code === 7 || code === 16 || String(pingErr.message).includes("UNAUTHENTICATED") || String(pingErr.message).includes("PERMISSION_DENIED")) {
+          console.error("\n╔══════════════════════════════════════════════════════╗");
+          console.error("║  FIREBASE AUTH ERROR — SERVICE ACCOUNT KEY REVOKED   ║");
+          console.error("╠══════════════════════════════════════════════════════╣");
+          console.error("║  Your serviceAccountKey.json has been invalidated.   ║");
+          console.error("║                                                      ║");
+          console.error("║  FIX (takes ~2 minutes):                             ║");
+          console.error("║  1. Firebase Console → Project Settings              ║");
+          console.error("║  2. Service Accounts tab                             ║");
+          console.error("║  3. Click \"Generate new private key\"                 ║");
+          console.error("║  4. Download the JSON file                           ║");
+          console.error("║  5. Rename it to serviceAccountKey.json              ║");
+          console.error("║  6. Replace: backend/config/serviceAccountKey.json   ║");
+          console.error("║  7. Restart the server                               ║");
+          console.error("╚══════════════════════════════════════════════════════╝\n");
+        } else {
+          // Transient network error — not a key problem, just log briefly
+          console.warn("  Firestore connectivity check warning:", pingErr.message);
+        }
+      }
+    });
+
   } catch (error) {
     console.error("Error initializing Firebase, falling back to local database:", error.message);
     initializeMock();
   }
 } else {
-  console.warn("Firebase serviceAccountKey.json not found in config. Falling back to local JSON database.");
+  console.warn("serviceAccountKey.json not found — using local JSON mock database.");
   initializeMock();
 }
 

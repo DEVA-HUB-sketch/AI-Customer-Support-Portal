@@ -86,12 +86,29 @@
           "timestamp": "2026-06-07T11:52:49.539Z",
           "senderName": "mano@gmail.com"
         }
+      ],
+      "escalated": true,
+      "escalatedAt": "2026-06-19T11:03:54.851Z",
+      "escalationReasons": [
+        "Agent has not responded in 9999.0h",
+        "Ticket inactive for 9999h — customer may be waiting"
+      ],
+      "updatedAt": "2026-06-19T11:03:54.851Z",
+      "timeline": [
+        {
+          "type": "escalated",
+          "actor": "system",
+          "icon": "ti-alert-triangle",
+          "color": "var(--danger)",
+          "note": "Auto-escalated: Agent has not responded in 9999.0h; Ticket inactive for 9999h — customer may be waiting",
+          "timestamp": "2026-06-19T11:03:54.851Z"
+        }
       ]
     },
     "6n8k0turd84": {
       "subject": "Getting charged twice for the exact same item or service",
       "description": "Getting charged twice for the exact same item or service, which often happens due to system glitches or overlapping manual and automated systems",
-      "priority": "Medium",
+      "priority": "High",
       "category": "Billing",
       "sentiment": "Neutral",
       "status": "In Progress",
@@ -145,6 +162,23 @@
           "timestamp": "2026-06-07T12:36:21.237Z",
           "senderName": "mano@gmail.com"
         }
+      ],
+      "escalated": true,
+      "escalatedAt": "2026-06-19T11:03:54.851Z",
+      "escalationReasons": [
+        "Agent has not responded in 9999.0h",
+        "Ticket inactive for 9999h — customer may be waiting"
+      ],
+      "updatedAt": "2026-06-19T11:03:54.851Z",
+      "timeline": [
+        {
+          "type": "escalated",
+          "actor": "system",
+          "icon": "ti-alert-triangle",
+          "color": "var(--danger)",
+          "note": "Auto-escalated: Agent has not responded in 9999.0h; Ticket inactive for 9999h — customer may be waiting",
+          "timestamp": "2026-06-19T11:03:54.851Z"
+        }
       ]
     },
     "p2542bnovl": {
@@ -197,6 +231,23 @@
           "text": "share your product and payemet details",
           "timestamp": "2026-06-07T12:49:23.132Z",
           "senderName": "mano@gmail.com"
+        }
+      ],
+      "escalated": true,
+      "escalatedAt": "2026-06-19T11:03:54.851Z",
+      "escalationReasons": [
+        "Agent has not responded in 9999.0h",
+        "Ticket inactive for 9999h — customer may be waiting"
+      ],
+      "updatedAt": "2026-06-19T11:03:54.851Z",
+      "timeline": [
+        {
+          "type": "escalated",
+          "actor": "system",
+          "icon": "ti-alert-triangle",
+          "color": "var(--danger)",
+          "note": "Auto-escalated: Agent has not responded in 9999.0h; Ticket inactive for 9999h — customer may be waiting",
+          "timestamp": "2026-06-19T11:03:54.851Z"
         }
       ]
     }
@@ -909,6 +960,163 @@
       "reason": "Account keywords detected.",
       "source": "fallback",
       "categorizedAt": "2026-06-07T11:48:32.859Z"
+    }
+  },
+  "escalations": {
+    "rugk7h5n2th": {
+      "ticketId": "jf1uk58icp",
+      "subject": "login issue",
+      "createdBy": "deva@gmail.com",
+      "assignedTo": "mano@gmail.com",
+      "reasons": [
+        "Agent has not responded in 9999.0h",
+        "Ticket inactive for 9999h — customer may be waiting"
+      ],
+      "priority": "High",
+      "escalatedAt": "2026-06-19T11:03:54.851Z",
+      "resolved": false
+    },
+    "jruxmz3s6y": {
+      "ticketId": "6n8k0turd84",
+      "subject": "Getting charged twice for the exact same item or service",
+      "createdBy": "deva@gmail.com",
+      "assignedTo": "mano@gmail.com",
+      "reasons": [
+        "Agent has not responded in 9999.0h",
+        "Ticket inactive for 9999h — customer may be waiting"
+      ],
+      "priority": "Medium",
+      "escalatedAt": "2026-06-19T11:03:54.851Z",
+      "resolved": false
+    },
+    "gxjyxu9nvyr": {
+      "ticketId": "p2542bnovl",
+      "subject": "Getting charged twice",
+      "createdBy": "deva@gmail.com",
+      "assignedTo": "mano@gmail.com",
+      "reasons": [
+        "Agent has not responded in 9999.0h",
+        "Ticket inactive for 9999h — customer may be waiting"
+      ],
+      "priority": "High",
+      "escalatedAt": "2026-06-19T11:03:54.851Z",
+      "resolved": false
+    }
+  },
+  "admin_notifications": {
+    "op6rfmn4ohi": {
+      "type": "TICKET_ESCALATED",
+      "severity": "warn",
+      "title": "Ticket Escalated",
+      "message": "Ticket \"login issue\" (deva@gmail.com) has been auto-escalated: Agent has not responded in 9999.0h",
+      "data": {
+        "ticketId": "jf1uk58icp",
+        "reasons": [
+          "Agent has not responded in 9999.0h",
+          "Ticket inactive for 9999h — customer may be waiting"
+        ]
+      },
+      "read": false,
+      "createdAt": "2026-06-19T11:03:54.861Z"
+    },
+    "1jjdqv6gowp": {
+      "type": "TICKET_ESCALATED",
+      "severity": "warn",
+      "title": "Ticket Escalated",
+      "message": "Ticket \"Getting charged twice for the exact same item or service\" (deva@gmail.com) has been auto-escalated: Agent has not responded in 9999.0h",
+      "data": {
+        "ticketId": "6n8k0turd84",
+        "reasons": [
+          "Agent has not responded in 9999.0h",
+          "Ticket inactive for 9999h — customer may be waiting"
+        ]
+      },
+      "read": false,
+      "createdAt": "2026-06-19T11:03:54.881Z"
+    },
+    "77x51ut4i38": {
+      "type": "TICKET_ESCALATED",
+      "severity": "warn",
+      "title": "Ticket Escalated",
+      "message": "Ticket \"Getting charged twice\" (deva@gmail.com) has been auto-escalated: Agent has not responded in 9999.0h",
+      "data": {
+        "ticketId": "p2542bnovl",
+        "reasons": [
+          "Agent has not responded in 9999.0h",
+          "Ticket inactive for 9999h — customer may be waiting"
+        ]
+      },
+      "read": false,
+      "createdAt": "2026-06-19T11:03:54.897Z"
+    }
+  },
+  "activity_logs": {
+    "bv0ktvlha5n": {
+      "userId": "system",
+      "email": "system",
+      "role": "system",
+      "action": "TICKET_ESCALATED",
+      "details": {
+        "ticketId": "jf1uk58icp",
+        "reasons": [
+          "Agent has not responded in 9999.0h",
+          "Ticket inactive for 9999h — customer may be waiting"
+        ]
+      },
+      "ipAddress": "",
+      "timestamp": "2026-06-19T11:03:54.867Z"
+    },
+    "uzgbrdo90oa": {
+      "userId": "system",
+      "email": "system",
+      "role": "system",
+      "action": "TICKET_ESCALATED",
+      "details": {
+        "ticketId": "6n8k0turd84",
+        "reasons": [
+          "Agent has not responded in 9999.0h",
+          "Ticket inactive for 9999h — customer may be waiting"
+        ]
+      },
+      "ipAddress": "",
+      "timestamp": "2026-06-19T11:03:54.883Z"
+    },
+    "jlwbdpq3w5": {
+      "userId": "system",
+      "email": "system",
+      "role": "system",
+      "action": "TICKET_ESCALATED",
+      "details": {
+        "ticketId": "p2542bnovl",
+        "reasons": [
+          "Agent has not responded in 9999.0h",
+          "Ticket inactive for 9999h — customer may be waiting"
+        ]
+      },
+      "ipAddress": "",
+      "timestamp": "2026-06-19T11:03:54.901Z"
+    },
+    "jxvbrubvt6f": {
+      "userId": "twffev05mm",
+      "email": "deva@gmail.com",
+      "role": "customer",
+      "action": "USER_LOGIN",
+      "details": {
+        "success": true
+      },
+      "ipAddress": "::1",
+      "timestamp": "2026-06-19T11:04:03.514Z"
+    },
+    "5t8b9y0urw9": {
+      "userId": "5zsfqd0ojgn",
+      "email": "girija@gmail.com",
+      "role": "admin",
+      "action": "USER_LOGIN",
+      "details": {
+        "success": true
+      },
+      "ipAddress": "::1",
+      "timestamp": "2026-06-19T11:04:26.702Z"
     }
   }
 }

@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="df-system.css"/>
+<link rel="stylesheet" href="df-responsive.css"/>
 <script src="df-theme.js"></script>
 <style>
 body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
@@ -20,7 +21,10 @@ body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 .admin-sidebar {
   width:230px; flex-shrink:0; background:rgba(8,20,22,.97);
   border-right:1px solid var(--border-dim); display:flex; flex-direction:column;
-  padding:22px 14px; position:sticky; top:0; height:100vh; overflow-y:auto;
+  padding:22px 14px; position:sticky; top:0;
+  height:100vh; height:100dvh;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
 }
 .a-brand { display:flex; align-items:center; gap:9px; margin-bottom:2rem; text-decoration:none; }
 .a-nav-link {
@@ -392,6 +396,9 @@ input:checked + .slider:before { transform:translateX(22px); }
 <div id="df-toast-container"></div>
 <div id="toast-container"></div>
 
+<!-- Mobile overlay — OUTSIDE shell (same pattern as customer dashboard) -->
+<div id="admin-nav-overlay" onclick="closeAdminSidebar()"></div>
+
 <div class="admin-shell">
 
   <!-- ════ SIDEBAR ════ -->
@@ -428,11 +435,16 @@ input:checked + .slider:before { transform:translateX(22px); }
 
     <header class="admin-header">
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
-      <div class="admin-user">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="df-hamburger" id="admin-hamburger" onclick="toggleAdminSidebar()" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="admin-user">
         <div class="admin-avatar" id="admin-avatar">X</div>
         <div class="admin-header-info">
           <h4 id="admin-name">Loading…</h4>
           <p>Administrator Account</p>
+        </div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
@@ -2833,6 +2845,31 @@ setInterval(() => {
     })
     .catch(()=>{});
 }, 60000);
+
+/* ── Mobile sidebar (admin) — mirrors customer dashboard pattern exactly ── */
+function toggleAdminSidebar() {
+  var sidebar = document.querySelector('.admin-shell > aside');
+  var overlay = document.getElementById('admin-nav-overlay');
+  var btn     = document.getElementById('admin-hamburger');
+  if (!sidebar) return;
+  var isOpen = sidebar.classList.toggle('sidebar-open');
+  if (overlay) overlay.style.display = isOpen ? 'block' : 'none';
+  if (btn)     btn.classList.toggle('is-open', isOpen);
+}
+function closeAdminSidebar() {
+  var sidebar = document.querySelector('.admin-shell > aside');
+  var overlay = document.getElementById('admin-nav-overlay');
+  var btn     = document.getElementById('admin-hamburger');
+  if (sidebar) sidebar.classList.remove('sidebar-open');
+  if (overlay) overlay.style.display = 'none';
+  if (btn)     btn.classList.remove('is-open');
+}
+/* Close sidebar when any nav item is tapped on mobile */
+document.querySelectorAll('.a-nav-link').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 1200) closeAdminSidebar();
+  });
+});
 </script>
 </body>
 </html>

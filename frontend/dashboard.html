@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link rel="stylesheet" href="df-system.css"/>
+<link rel="stylesheet" href="df-responsive.css"/>
 <script src="df-theme.js"></script>
 <style>
 /* ── DASHBOARD LAYOUT ── */
@@ -248,8 +249,7 @@
 
 @media(max-width:1200px){
   .page-shell { grid-template-columns:1fr; }
-  .side-nav { position:fixed; left:-280px; top:0; width:270px; z-index:400; transition:left .3s var(--ease); height:100vh; }
-  .side-nav.open { left:0; }
+  /* side-nav mobile styles handled by df-responsive.css */
   .main-content { padding:20px; margin-top:0; }
   .mobile-nav-toggle { display:flex; }
   .scene-hero { grid-template-columns:1fr; padding:24px; }
@@ -450,7 +450,7 @@
 
 <!-- Mobile nav toggle -->
 <button class="mobile-nav-toggle" id="mobile-nav-toggle"><i class="ti ti-menu-2"></i></button>
-<div id="nav-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:390;display:none;" onclick="closeSidebar()"></div>
+<div id="nav-overlay" onclick="closeSidebar()"></div>
 
 <div class="page-shell">
 
@@ -937,6 +937,12 @@ function closeSidebar() {
   document.getElementById('side-nav').classList.remove('open');
   document.getElementById('nav-overlay').style.display = 'none';
 }
+/* Close sidebar when any nav link is tapped */
+document.querySelectorAll('.side-nav .nav-link').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 1200) closeSidebar();
+  });
+});
 
 function scrollToSection(id) {
   const el = document.getElementById(id);

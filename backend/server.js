@@ -87,9 +87,11 @@ app.listen(PORT, () => {
   console.log(`DeskFlow Server running on port ${PORT}`);
   console.log(`Mode: ${isMock ? "LOCAL MOCK (No credentials)" : "FIREBASE ENGINE (Live Cert)"}`);
 
-  // ── Escalation Engine — runs every 30 minutes ─────────────────────────
+  // ── Escalation Engine — first run after 10 s (let Firebase finish auth)
   const { runEscalationCheck } = require("./services/escalationEngine");
-  runEscalationCheck().catch(() => {});
+  setTimeout(() => {
+    runEscalationCheck().catch(() => {});
+  }, 10000);
   setInterval(() => { runEscalationCheck().catch(() => {}); }, 30 * 60 * 1000);
-  console.log("[EscalationEngine] Auto-escalation check scheduled every 30 minutes");
+  console.log("[EscalationEngine] Scheduled (first run in 10s, then every 30 min)");
 });

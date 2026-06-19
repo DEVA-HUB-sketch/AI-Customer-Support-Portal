@@ -402,7 +402,7 @@ router.get("/my-notifications", async (req, res) => {
     notifications.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 
     const unread = notifications.filter(n => !n.read).length;
-    console.log(`[AgentNotification] Fetched ${notifications.length} notifications (${unread} unread) for ${email}`);
+    if (unread > 0) console.log(`[AgentNotification] ${unread} unread for ${email}`);
     res.json({ notifications: notifications.slice(0, 50), unread });
   } catch (err) {
     res.status(500).json({ message: err.message });

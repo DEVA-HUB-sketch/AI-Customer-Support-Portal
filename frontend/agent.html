@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link rel="stylesheet" href="df-system.css"/>
+<link rel="stylesheet" href="df-responsive.css"/>
 <script src="df-theme.js"></script>
 <style>
 body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
@@ -20,7 +21,10 @@ body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 .agent-sidebar {
   width:220px; flex-shrink:0; background:rgba(8,20,22,.97);
   border-right:1px solid var(--border-dim); display:flex; flex-direction:column;
-  padding:22px 14px; gap:4px; position:sticky; top:0; height:100vh; overflow-y:auto;
+  padding:22px 14px; gap:4px; position:sticky; top:0;
+  height:100vh; height:100dvh;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
 }
 .a-brand { display:flex; align-items:center; gap:9px; margin-bottom:1.5rem; text-decoration:none; }
 .a-nav-link {
@@ -436,7 +440,11 @@ body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 <div id="df-toast-container"></div>
 <div id="toast-container"></div>
 
+<!-- Mobile overlay — OUTSIDE shell (same pattern as customer dashboard) -->
+<div id="agent-nav-overlay" onclick="closeAgentSidebar()"></div>
+
 <div class="agent-shell">
+
 
   <!-- ════ SIDEBAR ════ -->
   <aside class="agent-sidebar" id="agent-sidebar">
@@ -483,11 +491,16 @@ body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
     <!-- Header -->
     <header class="agent-header">
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
-      <div class="agent-user">
-        <div class="agent-avatar" id="agent-avatar">A</div>
-        <div class="agent-header-info">
-          <h4 id="agent-name">Loading…</h4>
-          <p>Support Agent · DeskFlow AI</p>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="df-hamburger" id="agent-hamburger" onclick="toggleAgentSidebar()" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="agent-user">
+          <div class="agent-avatar" id="agent-avatar">A</div>
+          <div class="agent-header-info">
+            <h4 id="agent-name">Loading…</h4>
+            <p>Support Agent · DeskFlow AI</p>
+          </div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
@@ -1032,6 +1045,31 @@ document.addEventListener("DOMContentLoaded", function() {
   loadQueue();
   setInterval(loadQueue, 15000);
   startNotifPolling(); // ← starts 10-second notification polling
+});
+
+/* ── Mobile sidebar (agent) — mirrors customer dashboard pattern exactly ── */
+function toggleAgentSidebar() {
+  var sidebar = document.getElementById('agent-sidebar');
+  var overlay = document.getElementById('agent-nav-overlay');
+  var btn     = document.getElementById('agent-hamburger');
+  if (!sidebar) return;
+  var isOpen = sidebar.classList.toggle('sidebar-open');
+  if (overlay) overlay.style.display = isOpen ? 'block' : 'none';
+  if (btn)     btn.classList.toggle('is-open', isOpen);
+}
+function closeAgentSidebar() {
+  var sidebar = document.getElementById('agent-sidebar');
+  var overlay = document.getElementById('agent-nav-overlay');
+  var btn     = document.getElementById('agent-hamburger');
+  if (sidebar) sidebar.classList.remove('sidebar-open');
+  if (overlay) overlay.style.display = 'none';
+  if (btn)     btn.classList.remove('is-open');
+}
+/* Close sidebar when a nav item is tapped on mobile */
+document.querySelectorAll('.a-nav-link, .ai-rm-item').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 1200) closeAgentSidebar();
+  });
 });
 
 async function sendAgentReply() {

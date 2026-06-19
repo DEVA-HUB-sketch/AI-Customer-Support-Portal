@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link rel="stylesheet" href="df-system.css"/>
+<link rel="stylesheet" href="df-responsive.css"/>
 <script src="df-theme.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -117,10 +118,20 @@ nav{display:flex;flex-direction:column;gap:5px;flex:1;}
 /* ── Main ── */
 main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
 header{
-  display:flex;align-items:center;justify-content:space-between;padding:16px 24px;
+  display:flex;align-items:center;justify-content:space-between;padding:14px 24px;
   background:rgba(8,20,22,.8);border-bottom:1px solid var(--border-dim);
   backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;
+  flex-wrap:wrap;gap:8px;
 }
+/* AI page mobile sidebar toggle */
+#ai-mob-hamburger {
+  display:none; flex-direction:column; justify-content:center; gap:5px;
+  width:38px; height:38px; padding:7px; background:var(--glass);
+  border:1px solid var(--border-dim); border-radius:10px; cursor:pointer;
+  flex-shrink:0;
+}
+#ai-mob-hamburger span { display:block; width:100%; height:2px; background:var(--text-secondary); border-radius:2px; }
+@media(max-width:900px){ #ai-mob-hamburger { display:flex; } }
 .header-title h1{font-size:18px;font-weight:800;color:var(--text-primary);}
 .header-title{display:flex;align-items:center;gap:12px;}
 .header-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.07em;}
@@ -525,6 +536,9 @@ header{
 
 <div class="app-shell">
 
+<!-- Mobile overlay — inside shell -->
+<div class="df-mob-overlay" id="ai-mob-overlay" onclick="closeAiSidebar()"></div>
+
 <!-- ═══ SIDEBAR ═══ -->
 <aside>
   <a href="ai.html" class="brand">
@@ -566,12 +580,17 @@ header{
 <main>
   <header>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
-    <div class="header-title">
-      <div>
-        <h1>DeskFlow AI Assistant</h1>
-        <span id="panel-subtitle" style="font-size:12px;color:var(--text-muted)">AI Chatbot Panel</span>
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <button id="ai-mob-hamburger" onclick="toggleAiSidebar()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="header-title">
+        <div>
+          <h1>DeskFlow AI Assistant</h1>
+          <span id="panel-subtitle" style="font-size:12px;color:var(--text-muted)">AI Chatbot Panel</span>
+        </div>
+        <span class="header-badge"><i class="ti ti-sparkles"></i> AI POWERED</span>
       </div>
-      <span class="header-badge"><i class="ti ti-sparkles"></i> AI POWERED</span>
     </div>
     <div class="header-actions">
       <div class="hdr-btn" id="new-session-btn" title="New Chat Session"><i class="ti ti-plus"></i></div>
@@ -2158,6 +2177,37 @@ document.getElementById("refresh-analytics-btn").addEventListener("click", loadA
     if(e.key==='Enter' && !e.shiftKey){ e.stopImmediatePropagation(); e.preventDefault(); doSend(); }
   }, true);
 })();
+
+/* ── AI page mobile sidebar ─────────────────────────────── */
+function toggleAiSidebar() {
+  var aside   = document.querySelector('.app-shell > aside');
+  var overlay = document.getElementById('ai-mob-overlay');
+  var btn     = document.getElementById('ai-mob-hamburger');
+  if (!aside) return;
+  var isOpen = aside.classList.toggle('sidebar-open');
+  if (overlay) {
+    overlay.style.display = 'block';
+    requestAnimationFrame(function() { overlay.classList.toggle('open', isOpen); });
+  }
+  if (btn) btn.classList.toggle('is-open', isOpen);
+}
+function closeAiSidebar() {
+  var aside   = document.querySelector('.app-shell > aside');
+  var overlay = document.getElementById('ai-mob-overlay');
+  var btn     = document.getElementById('ai-mob-hamburger');
+  if (aside)   aside.classList.remove('sidebar-open');
+  if (overlay) {
+    overlay.classList.remove('open');
+    setTimeout(function(){ overlay.style.display = ''; }, 320);
+  }
+  if (btn) btn.classList.remove('is-open');
+}
+/* Close sidebar when a nav item is clicked on mobile */
+document.querySelectorAll('.nav-item[data-panel]').forEach(function(item) {
+  item.addEventListener('click', function() {
+    if (window.innerWidth <= 900) closeAiSidebar();
+  });
+});
 </script>
 </body>
 </html>
