@@ -187,10 +187,33 @@ async function sendWelcome({ email, name, role }) {
   await send(email, "[DeskFlow AI] Welcome! Your account is ready", html);
 }
 
+// ─── Email: OTP Verification — Feature 18 ─────────────────────────────────────
+async function sendOTPEmail({ email, code, action, expiresAt }) {
+  const actionLabels = {
+    block_user:     "Block User Account",
+    delete_account: "Delete Account",
+    grant_admin:    "Grant Admin Role",
+    restore_user:   "Restore Blocked User",
+    delete_kb:      "Delete Knowledge Base Article"
+  };
+  const html = wrap("Action Verification Code — DeskFlow AI", `
+    <h2>Your Verification Code</h2>
+    <p>You requested to perform a sensitive action: <strong>${actionLabels[action] || action}</strong></p>
+    <p>Enter this code to proceed:</p>
+    <div style="text-align:center;margin:24px 0">
+      <span style="font-size:36px;font-weight:900;letter-spacing:8px;color:#D4AF37;background:#0a1f20;padding:16px 28px;border-radius:12px;display:inline-block">${code}</span>
+    </div>
+    <p>This code expires at <strong>${new Date(expiresAt).toLocaleString()}</strong> (10 minutes).</p>
+    <p style="color:#e74c3c">If you did not request this, please contact your administrator immediately.</p>
+  `);
+  await send(email, "[DeskFlow AI] Action Verification Code", html);
+}
+
 module.exports = {
   sendTicketCreated,
   sendTicketAssigned,
   sendTicketResolved,
   sendPasswordReset,
-  sendWelcome
+  sendWelcome,
+  sendOTPEmail
 };

@@ -3,6 +3,7 @@ const express = require("express");
 const router  = express.Router();
 const { db }  = require("../config/firebase");
 const { log, ACTIONS } = require("../services/activityLogger");
+const { verifyToken, requireRole } = require("../middleware/auth");
 
 // Get all KB articles / FAQs
 router.get("/", async (req, res) => {
@@ -50,8 +51,8 @@ router.get("/categories", async (req, res) => {
   }
 });
 
-// POST /api/kb - Add a new KB article (admin)
-router.post("/", async (req, res) => {
+// POST /api/kb - Add a new KB article (admin only)
+router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
   try {
     const { question, answer, category } = req.body;
     if (!question || !answer || !category) {
@@ -72,8 +73,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// DELETE /api/kb/:id - Delete a KB article (admin)
-router.delete("/:id", async (req, res) => {
+// DELETE /api/kb/:id - Delete a KB article (admin only)
+router.delete("/:id", verifyToken, requireRole("admin"), async (req, res) => {
   try {
     await db.collection("kb").doc(req.params.id).delete();
     log({ userId: req.query.deletedBy || "admin", email: req.query.deletedBy || "admin", role: "admin",

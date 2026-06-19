@@ -168,6 +168,7 @@ function initializeMock() {
               }
               return {
                 empty: docs.length === 0,
+                size:  docs.length,
                 docs: docs.map(doc => ({
                   id: doc.id,
                   data: () => doc
@@ -186,6 +187,7 @@ function initializeMock() {
           const docs = self._readCollection(colName);
           return {
             empty: docs.length === 0,
+            size:  docs.length,
             docs: docs.map(doc => ({
               id: doc.id,
               data: () => doc

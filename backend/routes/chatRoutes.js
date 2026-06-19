@@ -2,51 +2,68 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
-const { getChatbotReply, analyzeSentiment } = require("../services/aiService");
+const { analyzeSentiment } = require("../services/aiService");
+const { geminiChat } = require("../services/geminiService");
 const { log, ACTIONS } = require("../services/activityLogger");
 
-// POST /api/chat/bot
+const ESCALATE_KEYWORDS = [
+  "speak to agent", "talk to agent", "human agent", "real agent",
+  "connect me to", "escalate", "live agent", "speak with someone",
+  "human support", "agent please", "need an agent", "want a person",
+  "transfer me", "get a human", "talk to a person", "speak to a person"
+];
+
+function detectCategory(message) {
+  const clean = message.toLowerCase();
+  if (["billing","invoice","payment","refund","charge","subscription"].some(k => clean.includes(k))) return "Billing Issue";
+  if (["login","password","reset","account","locked","access"].some(k => clean.includes(k))) return "Account Issue";
+  if (["bug","error","crash","broken","not working","issue","problem"].some(k => clean.includes(k))) return "Technical Issue";
+  if (["feature","request","suggest","improve","add"].some(k => clean.includes(k))) return "Feature Request";
+  return "General Inquiry";
+}
+
+// POST /api/chat/bot  — public, no auth required (used by landing page chatbot)
 router.post("/bot", async (req, res) => {
   try {
     const { message, email, history } = req.body;
-    
-    // Get AI Chatbot Response
-    const botResult = getChatbotReply(message, history);
+    if (!message) return res.json({ reply: "Please enter a message.", escalate: false });
 
-    // Search KB first — return KB answer if matched and not escalating
+    const clean = message.toLowerCase();
+    const category = detectCategory(message);
+    const escalate = ESCALATE_KEYWORDS.some(k => clean.includes(k));
+
+    // Search KB first — return KB answer if no escalation triggered
     const kbSnap = await db.collection("kb").get();
     const kbArticles = [];
     kbSnap.forEach(doc => kbArticles.push(doc.data()));
-    const clean = message.toLowerCase();
     const kbMatch = kbArticles.find(a => {
-      const q = a.question.toLowerCase();
+      const q = (a.question || "").toLowerCase();
       return (
         clean.includes(q.substring(0, 20)) ||
         q.split(" ").some(w => w.length > 4 && clean.includes(w))
       );
     });
-    if (kbMatch && !botResult.escalate) {
+    if (kbMatch && !escalate) {
       log({ userId: email || "anonymous", email: email || "", role: "customer",
             action: ACTIONS.KB_SEARCHED,
-            details: { query: (message || "").substring(0, 100), matched: kbMatch.question },
+            details: { query: message.substring(0, 100), matched: kbMatch.question },
             ip: req.clientIp });
-      return res.json({ reply: kbMatch.answer, source: "kb", escalate: false });
+      return res.json({ reply: kbMatch.answer, source: "kb", escalate: false, category });
     }
 
     let ticketId = null;
-    
-    // If bot decides to escalate, auto-create a support ticket
-    if (botResult.escalate && email) {
+    let reply;
+
+    if (escalate && email) {
       const sentiment = analyzeSentiment(message);
       const priority = sentiment === "Negative" ? "High" : "Medium";
-      
       const newTicket = {
         subject: `Auto Escalation: ${message.substring(0, 40)}${message.length > 40 ? "..." : ""}`,
-        description: `Customer requested agent support. Context message: "${message}"`,
-        category: botResult.category || "General Inquiry",
-        priority: priority,
+        description: `Customer requested agent support. Context: "${message}"`,
+        category,
+        priority,
         status: "Open",
-        sentiment: sentiment,
+        sentiment,
         createdAt: new Date().toISOString(),
         createdBy: email.toLowerCase(),
         assignedTo: null,
@@ -56,36 +73,26 @@ router.post("/bot", async (req, res) => {
           timestamp: new Date().toISOString(),
           note: "Ticket created automatically via live chatbot escalation."
         }],
-        messages: [{
-          sender: "customer",
-          text: message,
-          timestamp: new Date().toISOString()
-        }, {
-          sender: "agent",
-          text: botResult.reply,
-          timestamp: new Date().toISOString(),
-          isBot: true
-        }]
+        messages: [
+          { sender: "customer", text: message, timestamp: new Date().toISOString() }
+        ]
       };
-      
       const docRef = await db.collection("tickets").add(newTicket);
       ticketId = docRef.id;
-      
-      botResult.reply += ` A support ticket has been logged under ID: #${ticketId.substring(0, 6).toUpperCase()}.`;
+      reply = `I've connected you with our support team! A ticket has been created (#${ticketId.substring(0, 6).toUpperCase()}). An agent will reach out to you shortly.`;
+    } else {
+      const result = await geminiChat(message, history || []);
+      reply = result.reply;
     }
-    
+
     log({ userId: email || "anonymous", email: email || "", role: "customer",
           action: ACTIONS.AI_CHAT_USED,
-          details: { message: (message || "").substring(0, 120), escalated: botResult.escalate, ticketId },
+          details: { message: message.substring(0, 120), escalated: escalate, ticketId },
           ip: req.clientIp });
 
-    res.json({
-      reply: botResult.reply,
-      escalate: botResult.escalate,
-      category: botResult.category,
-      ticketId: ticketId
-    });
+    res.json({ reply, escalate, category, ticketId });
   } catch (error) {
+    console.error("[ChatRoute] Error:", error.message);
     res.status(500).json({ message: error.message });
   }
 });

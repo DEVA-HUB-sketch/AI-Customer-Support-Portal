@@ -2,6 +2,10 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
+const { verifyToken } = require("../middleware/auth");
+
+// All analytics routes require a valid JWT
+router.use(verifyToken);
 
 // GET /api/analytics?role=admin|agent|customer&email=...
 router.get("/", async (req, res) => {
@@ -61,7 +65,8 @@ router.get("/", async (req, res) => {
       // Agent performance stats
       const agents = users.filter(u => u.role === "agent");
       const agentStats = agents.map(agent => {
-        const agentTickets = tickets.filter(t => t.assignedTo === agent.email);
+        const agentEmailLower = (agent.email || "").toLowerCase();
+        const agentTickets = tickets.filter(t => (t.assignedTo || "").toLowerCase() === agentEmailLower);
         const agentResolved = agentTickets.filter(t => t.status === "Resolved");
 
         // avg response hours
@@ -123,7 +128,7 @@ router.get("/", async (req, res) => {
 
     if (role === "agent" && email) {
       const emailLower = email.toLowerCase();
-      const agentTickets = tickets.filter(t => t.assignedTo === emailLower);
+      const agentTickets = tickets.filter(t => (t.assignedTo || "").toLowerCase() === emailLower);
       const agentResolved = agentTickets.filter(t => t.status === "Resolved");
 
       let totalHours = 0;
@@ -155,9 +160,10 @@ router.get("/", async (req, res) => {
       // Compute rank among all agents
       const allAgents = users.filter(u => u.role === "agent");
       const agentScores = allAgents.map(ag => {
-        const ats = tickets.filter(t => t.assignedTo === ag.email && t.status === "Resolved" && t.rating != null);
+        const agEmail = (ag.email || "").toLowerCase();
+        const ats = tickets.filter(t => (t.assignedTo || "").toLowerCase() === agEmail && t.status === "Resolved" && t.rating != null);
         const score = ats.length > 0 ? ats.reduce((s, t) => s + t.rating, 0) / ats.length : 0;
-        return { email: ag.email, score };
+        return { email: agEmail, score };
       }).filter(a => a.score > 0).sort((a, b) => b.score - a.score);
 
       const rankIdx = agentScores.findIndex(a => a.email === emailLower);

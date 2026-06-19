@@ -1,243 +1,226 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Profile Settings — DeskFlow AI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="stylesheet" href="df-system.css"/>
+<script src="df-theme.js"></script>
 <style>
-:root {
-  --bg:         #0a0a0f;
-  --surface:    rgba(255,255,255,0.04);
-  --surface2:   rgba(255,255,255,0.08);
-  --border:     rgba(255,255,255,0.08);
-  --border2:    rgba(255,255,255,0.14);
-  --text:       #f0f0ff;
-  --text2:      #9090b0;
-  --accent:     #6c63ff;
-  --accent-glow: rgba(108,99,255,0.3);
-  --radius:     16px;
-  --font:       'Plus Jakarta Sans', sans-serif;
-  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
-}
-[data-theme="light"] {
-  --bg:       #f8f8ff;
-  --surface:  rgba(0,0,0,0.03);
-  --surface2: rgba(0,0,0,0.06);
-  --border:   rgba(0,0,0,0.08);
-  --border2:  rgba(0,0,0,0.14);
-  --text:     #0a0a1a;
-  --text2:    #505070;
-  --accent-glow: rgba(108,99,255,0.15);
+body { display:flex; align-items:center; justify-content:center; min-height:100vh; overflow:hidden; }
+
+.profile-wrap { position:relative; z-index:2; width:100%; max-width:520px; padding:1.5rem; }
+
+.profile-card {
+  background:var(--glass); border:1px solid var(--border);
+  border-radius:24px; padding:2.5rem;
+  box-shadow:0 40px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(212,175,55,.06);
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
-body{
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:var(--bg);
-    color:var(--text);
-    overflow:hidden;
-    position:relative;
-    cursor:none;
-    transition:background var(--transition), color var(--transition);
+/* Avatar */
+.profile-avatar-section { text-align:center; margin-bottom:2rem; }
+.profile-avatar {
+  width:80px; height:80px; border-radius:50%;
+  background:var(--grad-gold); display:flex; align-items:center; justify-content:center;
+  font-size:2rem; font-weight:900; color:var(--bg-primary);
+  margin:0 auto 1rem; box-shadow:0 0 30px rgba(212,175,55,.4);
+  position:relative;
+}
+.profile-avatar::after {
+  content:''; position:absolute; inset:-4px; border-radius:50%;
+  border:2px solid rgba(212,175,55,.3); animation:glowPulse 3s ease-in-out infinite;
+}
+.profile-name { font-size:1.4rem; font-weight:900; letter-spacing:-.5px; margin-bottom:4px; }
+.profile-role-badge {
+  display:inline-flex; align-items:center; gap:6px; padding:4px 14px;
+  border-radius:100px; font-size:12px; font-weight:700;
+  background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.2); color:var(--gold);
 }
 
-.bg-gradient {
-  position:absolute;
-  inset:0;
-  z-index:0;
-  background:radial-gradient(circle at 50% 50%,rgba(108,99,255,0.12) 0%,transparent 50%);
+/* Form */
+.form-field { margin-bottom:1.1rem; }
+.form-label { font-size:11.5px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; display:block; }
+.form-input-wrap { position:relative; }
+.form-input-wrap .fi-icon {
+  position:absolute; left:13px; top:50%; transform:translateY(-50%);
+  font-size:17px; color:var(--text-muted); pointer-events:none; z-index:1; transition:color .2s;
 }
+.form-input {
+  width:100%; padding:12px 14px 12px 43px;
+  background:rgba(22,52,54,.5); border:1px solid var(--border-dim);
+  border-radius:12px; color:var(--text-primary); font-family:var(--font);
+  font-size:14.5px; outline:none; transition:all .25s;
+}
+.form-input:focus { border-color:var(--gold); background:rgba(22,52,54,.8); box-shadow:0 0 0 3px rgba(212,175,55,.1); }
+.form-input:disabled { opacity:.5; cursor:not-allowed; }
+.form-input-wrap:focus-within .fi-icon { color:var(--gold); }
+.form-input::placeholder { color:var(--text-muted); }
 
-#cursor{position:fixed;width:12px;height:12px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,background 0.2s;mix-blend-mode:difference}
-#cursor-trail{position:fixed;width:36px;height:36px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform 0.1s ease;opacity:0.4}
+/* Msg */
+#profile-msg { margin-top:12px; font-size:13.5px; font-weight:600; text-align:center; padding:10px 14px; border-radius:10px; }
 
-.card{
-    width:450px;
-    background:rgba(255,255,255,0.03);
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:40px;
-    box-shadow:0 24px 80px rgba(0,0,0,0.4);
-    z-index:10;
-    transition:all var(--transition);
-}
-[data-theme="light"] .card{
-    background:rgba(255,255,255,0.75);
-    box-shadow:0 20px 40px rgba(0,0,0,0.05);
-}
+/* Divider */
+.form-divider { height:1px; background:var(--border-dim); margin:1.5rem 0; }
 
-h2{font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;text-align:center;}
-.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:30px;}
+/* Actions */
+.profile-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.btn-save {
+  width:100%; padding:13px; border:none; border-radius:12px;
+  background:var(--grad-gold); color:var(--bg-primary);
+  font-family:var(--font); font-size:14.5px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:var(--shadow-gold); transition:all .3s var(--ease); cursor:pointer;
+}
+.btn-save:hover { transform:translateY(-2px); box-shadow:0 0 36px rgba(212,175,55,.5); }
+.btn-back {
+  width:100%; padding:12px; border-radius:12px;
+  background:var(--glass); border:1px solid var(--border); color:var(--text-primary);
+  font-family:var(--font); font-size:14px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px; transition:all .25s;
+}
+.btn-back:hover { border-color:rgba(212,175,55,.25); color:var(--gold-light); }
 
-.input-group{
-    position:relative;
-    margin-bottom:20px;
+/* Danger zone */
+.danger-zone { margin-top:1.5rem; padding:1.2rem; border-radius:14px; background:rgba(231,76,60,.05); border:1px solid rgba(231,76,60,.15); }
+.danger-zone h5 { font-size:12px; font-weight:700; color:var(--danger); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.danger-zone p  { font-size:12.5px; color:var(--text-muted); margin-bottom:10px; }
+.btn-logout {
+  padding:10px 18px; border-radius:10px; border:1px solid rgba(231,76,60,.3);
+  background:rgba(231,76,60,.08); color:var(--danger);
+  font-family:var(--font); font-size:13px; font-weight:600; cursor:pointer; transition:all .25s;
+  display:inline-flex; align-items:center; gap:7px;
 }
-.input-group i{
-    position:absolute;
-    left:16px;
-    top:50%;
-    transform:translateY(-50%);
-    color:var(--text2);
-    font-size:18px;
-    pointer-events:none;
-}
-input{
-    width:100%;
-    padding:14px 14px 14px 48px;
-    border:1px solid var(--border);
-    outline:none;
-    border-radius:12px;
-    background:var(--surface);
-    color:var(--text);
-    font-size:15px;
-    transition:all var(--transition);
-}
-input:focus{
-    border-color:var(--accent);
-    background:var(--surface2);
-    box-shadow:0 0 16px var(--accent-glow);
-}
-input:disabled{
-    opacity:0.6;
-    cursor:not-allowed;
-}
+.btn-logout:hover { background:rgba(231,76,60,.15); }
 
-.btn{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    cursor:none;
-    font-size:15px;
-    font-weight:700;
-    transition:all var(--transition);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
+.back-link {
+  position:fixed; top:1.5rem; left:1.5rem; z-index:3;
+  display:inline-flex; align-items:center; gap:7px; padding:8px 14px;
+  border-radius:10px; font-size:13px; font-weight:600;
+  background:var(--glass); border:1px solid var(--border-dim); color:var(--text-muted);
+  transition:all .25s; text-decoration:none;
 }
-.primary-btn{
-    background:linear-gradient(135deg,var(--accent),#8b5cf6);
-    color:white;
-    box-shadow:0 8px 24px var(--accent-glow);
-    margin-bottom:15px;
-}
-.primary-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 12px 30px rgba(108,99,255,0.5);
-}
-.secondary-btn{
-    background:var(--surface);
-    border:1px solid var(--border);
-    color:var(--text);
-}
-.secondary-btn:hover{
-    background:var(--surface2);
-    border-color:var(--accent);
-}
+.back-link:hover { color:var(--gold-light); border-color:rgba(212,175,55,.25); }
 </style>
 </head>
 <body>
+<button class="df-theme-btn" onclick="DFTheme.toggle()" title="Toggle light/dark mode" style="position:fixed;top:16px;right:16px;z-index:9999"><i class="ti ti-sun df-theme-icon"></i></button>
+<div class="df-bg"><div class="df-bg-aurora"></div><div class="df-bg-grid"></div></div>
+<div id="df-cursor"></div>
+<div id="df-cursor-ring"></div>
+<div id="df-toast-container"></div>
 
-<div class="bg-gradient"></div>
+<a href="#" onclick="goBack();return false" class="back-link"><i class="ti ti-arrow-left"></i> Back</a>
 
-<div id="cursor"></div>
-<div id="cursor-trail"></div>
+<div class="profile-wrap">
+  <div class="profile-card df-glow-border">
 
-<div class="card">
-    <h2>Profile Settings</h2>
-    <p class="subtitle" id="role-badge">Manage your DeskFlow profile</p>
-
-    <div class="input-group">
-        <i class="ti ti-user"></i>
-        <input type="text" id="name" placeholder="Full Name" required>
+    <div class="profile-avatar-section">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div class="profile-name" id="profile-display-name">Loading…</div>
+      <div class="profile-role-badge" id="role-badge"><i class="ti ti-shield-check"></i> Role</div>
     </div>
 
-    <div class="input-group">
-        <i class="ti ti-mail"></i>
-        <input type="email" id="email" placeholder="Email Address" disabled>
+    <div class="form-field">
+      <label class="form-label">Full name</label>
+      <div class="form-input-wrap">
+        <i class="ti ti-user fi-icon"></i>
+        <input class="form-input" type="text" id="name" placeholder="Your full name"/>
+      </div>
     </div>
 
-    <button class="btn primary-btn" onclick="updateProfile()">
-        <i class="ti ti-device-floppy"></i> Save Profile Details
-    </button>
+    <div class="form-field">
+      <label class="form-label">Email address</label>
+      <div class="form-input-wrap">
+        <i class="ti ti-mail fi-icon"></i>
+        <input class="form-input" type="email" id="email" placeholder="Email address" disabled/>
+      </div>
+    </div>
 
-    <button class="btn secondary-btn" onclick="goBack()">
-        <i class="ti ti-arrow-left"></i> Back to Dashboard
-    </button>
+    <div id="profile-msg" style="display:none"></div>
+
+    <div class="form-divider"></div>
+
+    <div class="profile-actions">
+      <button class="btn-save df-ripple-btn" onclick="updateProfile()"><i class="ti ti-device-floppy"></i> Save changes</button>
+      <button class="btn-back df-ripple-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i> Go back</button>
+    </div>
+
+    <div class="danger-zone" style="margin-top:1.5rem">
+      <h5><i class="ti ti-alert-triangle"></i> Session</h5>
+      <p>Sign out of your DeskFlow AI account on this device.</p>
+      <button class="btn-logout" onclick="logout()"><i class="ti ti-logout"></i> Sign out</button>
+    </div>
+
+  </div>
 </div>
 
+<script src="df-core.js"></script>
 <script>
-// Custom Cursor Trail
-const cursor = document.getElementById("cursor");
-const cursorTrail = document.getElementById("cursor-trail");
-document.addEventListener("mousemove", (e) => {
-    cursor.style.left = e.clientX + "px";
-    cursor.style.top = e.clientY + "px";
-    cursorTrail.style.left = e.clientX + "px";
-    cursorTrail.style.top = e.clientY + "px";
-});
-
-// Load Profile
 let user = null;
-try {
-    user = JSON.parse(localStorage.getItem("deskflow_user"));
-} catch(e) {}
+try { user = JSON.parse(localStorage.getItem("deskflow_user")); } catch(e) {}
 
-if (!user) {
-    alert("Session expired, please sign in.");
-    window.location.href = "signin.html";
-} else {
-    document.getElementById("name").value = user.name;
-    document.getElementById("email").value = user.email;
-    document.getElementById("role-badge").innerText = `Role: ${user.role.toUpperCase()}`;
+if (!user) { window.location.href = "signin.html"; }
+else {
+  document.getElementById("name").value = user.name || '';
+  document.getElementById("email").value = user.email || '';
+  const initials = (user.name || user.email || 'U')[0].toUpperCase();
+  document.getElementById("profile-avatar").textContent = initials;
+  document.getElementById("profile-display-name").textContent = user.name || user.email;
+  const roleEl = document.getElementById("role-badge");
+  const roleLabels = { customer:'Customer', agent:'Support Agent', admin:'Administrator' };
+  const roleIcons  = { customer:'ti-user', agent:'ti-headset', admin:'ti-shield' };
+  roleEl.innerHTML = `<i class="ti ${roleIcons[user.role]||'ti-user'}"></i> ${roleLabels[user.role]||user.role.toUpperCase()}`;
 }
 
-async function updateProfile(){
-    const name = document.getElementById("name").value.trim();
-    if(!name){
-        alert("Name cannot be empty.");
-        return;
-    }
-
-    try{
-        const response = await fetch(
-            "http://localhost:5000/api/auth/update-profile",
-            {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: user.email, name })
-            }
-        );
-
-        const data = await response.json();
-        alert(data.message);
-
-        if (response.status === 200) {
-            user.name = name;
-            localStorage.setItem("deskflow_user", JSON.stringify(user));
-        }
-    }
-    catch(error){
-        console.error(error);
-        alert("Unable to update profile.");
-    }
+function showMsg(msg, ok) {
+  const el = document.getElementById("profile-msg");
+  el.style.display = 'block';
+  el.style.background = ok ? 'rgba(46,204,113,.1)' : 'rgba(231,76,60,.1)';
+  el.style.border = ok ? '1px solid rgba(46,204,113,.25)' : '1px solid rgba(231,76,60,.25)';
+  el.style.color = ok ? 'var(--success)' : 'var(--danger)';
+  el.textContent = msg;
 }
 
-function goBack(){
-    if (user.role === "customer") window.location.href = "dashboard.html";
-    else if (user.role === "agent") window.location.href = "agent.html";
-    else if (user.role === "admin") window.location.href = "admin.html";
+async function updateProfile() {
+  const name = document.getElementById("name").value.trim();
+  if (!name) { showMsg("Name cannot be empty.", false); return; }
+  try {
+    const token = localStorage.getItem("deskflow_token") || "";
+    const response = await fetch("/api/auth/update-profile", {
+      method:"PUT",
+      headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`},
+      body: JSON.stringify({ email:user.email, name })
+    });
+    const data = await response.json();
+    showMsg(data.message, response.ok);
+    if (response.ok) {
+      user.name = name;
+      localStorage.setItem("deskflow_user", JSON.stringify(user));
+      document.getElementById("profile-display-name").textContent = name;
+      document.getElementById("profile-avatar").textContent = name[0].toUpperCase();
+      window.dfToast && window.dfToast("Profile updated successfully!", "success");
+    }
+  } catch(e) {
+    showMsg("Unable to update profile.", false);
+  }
+}
+
+function goBack() {
+  if (!user) { window.location.href = "signin.html"; return; }
+  if (user.role === "agent") window.location.href = "agent.html";
+  else if (user.role === "admin") window.location.href = "admin.html";
+  else window.location.href = "dashboard.html";
+}
+
+function logout() {
+  localStorage.removeItem("deskflow_token");
+  localStorage.removeItem("deskflow_user");
+  window.location.href = "signin.html";
 }
 </script>
 </body>

@@ -6,8 +6,106 @@ const bcrypt  = require("bcryptjs");
 const jwt     = require("jsonwebtoken");
 const { log, ACTIONS } = require("../services/activityLogger");
 const { sendWelcome, sendPasswordReset } = require("../services/emailService");
+const { verifyToken, requireRole } = require("../middleware/auth");
 
-const JWT_SECRET = process.env.JWT_SECRET || "deskflow_super_secret_token_123456";
+const JWT_SECRET = process.env.JWT_SECRET || "deskflow_super_secret_jwt_2024";
+
+/*
+========================================
+ME — returns the authenticated user's fresh role from DB
+========================================
+*/
+router.get("/me", verifyToken, async (req, res) => {
+  try {
+    const snap = await db.collection("users").where("email", "==", req.user.email).get();
+    if (snap.empty) return res.status(404).json({ message: "User not found." });
+    let userData = null;
+    snap.forEach(doc => { userData = { id: doc.id, ...doc.data() }; });
+    const { password, ...safeUser } = userData;
+    res.json({ user: safeUser, role: userData.role });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/*
+========================================
+ADMIN CREATE USER — admin only
+Directly creates an account with a specified role (bypasses signup form)
+========================================
+*/
+router.post("/admin-create-user", verifyToken, requireRole("admin"), async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+    const validRoles = ["customer", "agent", "admin"];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: "Invalid role specified." });
+    }
+    const emailLower = email.toLowerCase().trim();
+
+    const existing = await db.collection("users").where("email", "==", emailLower).get();
+    if (!existing.empty) {
+      return res.status(400).json({ message: "An account with this email already exists." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const baseData = {
+      name, email: emailLower, role,
+      password: hashedPassword,
+      createdAt: new Date().toISOString(),
+      createdBy: req.user.email
+    };
+
+    if (isMock) {
+      const uid = "adm_" + Math.random().toString(36).substring(2, 12);
+      await db.collection("users").doc(uid).set({ uid, ...baseData });
+    } else {
+      try {
+        const userRecord = await auth.createUser({ email: emailLower, password, displayName: name });
+        await db.collection("users").doc(userRecord.uid).set({ uid: userRecord.uid, ...baseData });
+      } catch (_fbErr) {
+        const uid = "adm_" + Date.now();
+        await db.collection("users").doc(uid).set({ uid, ...baseData });
+      }
+    }
+
+    log({ userId: req.user.uid, email: req.user.email, role: "admin",
+          action: ACTIONS.USER_SIGNUP,
+          details: { createdEmail: emailLower, createdRole: role, method: "admin_direct" },
+          ip: req.clientIp });
+    sendWelcome({ email: emailLower, name, role }).catch(() => {});
+
+    res.status(201).json({ message: `Account created for ${name} (${emailLower}) as ${role}.` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/*
+========================================
+CHECK INVITE — public, no auth required
+Returns the pending role invitation for an email (if any)
+========================================
+*/
+router.get("/check-invite", async (req, res) => {
+  try {
+    const email = (req.query.email || "").toLowerCase();
+    if (!email) return res.json({ role: null });
+    const snap = await db.collection("authorized_emails")
+      .where("email", "==", email)
+      .where("used", "==", false)
+      .get();
+    if (snap.empty) return res.json({ role: null });
+    let inviteRole = null;
+    snap.forEach(doc => { inviteRole = doc.data().role; });
+    return res.json({ role: inviteRole });
+  } catch (_) {
+    return res.json({ role: null });
+  }
+});
 
 /*
 ========================================
@@ -29,6 +127,24 @@ router.post("/signup", async (req, res) => {
     }
 
     const finalRole = role || "customer";
+
+    // Agent and Admin accounts require prior admin authorization
+    if (finalRole === "agent" || finalRole === "admin") {
+      const authSnap = await db.collection("authorized_emails")
+        .where("email", "==", emailLower)
+        .where("role", "==", finalRole)
+        .where("used", "==", false)
+        .get();
+      if (authSnap.empty) {
+        return res.status(403).json({
+          message: `This email is not authorized for the ${finalRole} role. Please contact your administrator to get access.`
+        });
+      }
+      // Mark invitation as used
+      try {
+        await db.collection("authorized_emails").doc(authSnap.docs[0].id).update({ used: true, usedAt: new Date().toISOString() });
+      } catch (_) {}
+    }
 
     if (isMock) {
       await auth.createUser({ email: emailLower, password, displayName: name, role: finalRole });
@@ -79,6 +195,17 @@ router.post("/login", async (req, res) => {
       log({ userId: userData.uid || userData.id, email: emailLower, role: userData.role,
             action: ACTIONS.USER_LOGIN, details: { success: false }, ip: req.clientIp });
       return res.status(401).json({ message: "Invalid Password" });
+    }
+
+    // ── Block check — reject if account is blocked ───────────────────────
+    if (userData.blocked) {
+      log({ userId: userData.uid || userData.id, email: emailLower, role: userData.role,
+            action: ACTIONS.USER_LOGIN, details: { success: false, reason: "account_blocked" }, ip: req.clientIp });
+      return res.status(403).json({
+        message: "Your account has been suspended. Please contact support or submit an appeal.",
+        blocked: true,
+        appealUrl: "/signin.html"
+      });
     }
 
     const token = jwt.sign(
@@ -139,10 +266,10 @@ router.post("/reset-password", async (req, res) => {
 
 /*
 ========================================
-PROFILE UPDATE
+PROFILE UPDATE — requires valid session
 ========================================
 */
-router.put("/update-profile", async (req, res) => {
+router.put("/update-profile", verifyToken, async (req, res) => {
   try {
     const { email, name } = req.body;
     if (!email || !name) {
@@ -172,10 +299,10 @@ router.put("/update-profile", async (req, res) => {
 
 /*
 ========================================
-GET ALL USERS (Admin Roster)
+GET ALL USERS (Admin Roster) — admin only
 ========================================
 */
-router.get("/users", async (req, res) => {
+router.get("/users", verifyToken, requireRole("admin"), async (req, res) => {
   try {
     const userSnapshot = await db.collection("users").get();
     const users = [];
@@ -191,10 +318,10 @@ router.get("/users", async (req, res) => {
 
 /*
 ========================================
-UPDATE USER ROLE (RBAC Auth Control)
+UPDATE USER ROLE (RBAC Auth Control) — admin only
 ========================================
 */
-router.put("/users/role", async (req, res) => {
+router.put("/users/role", verifyToken, requireRole("admin"), async (req, res) => {
   try {
     const { email, role, adminEmail } = req.body;
     if (!email || !role) {
@@ -256,6 +383,13 @@ router.post("/google", async (req, res) => {
 
     if (!userSnapshot.empty) {
       userSnapshot.forEach(doc => { userData = doc.data(); userId = doc.id; });
+      // Block check for Google login too
+      if (userData.blocked) {
+        return res.status(403).json({
+          message: "Your account has been suspended. Please contact support or submit an appeal.",
+          blocked: true
+        });
+      }
       if (photoURL && !userData.photoURL) {
         await db.collection("users").doc(userId).update({ photoURL });
       }

@@ -2,6 +2,10 @@
 const express = require("express");
 const router  = express.Router();
 const { db }  = require("../config/firebase");
+const { verifyToken, requireRole } = require("../middleware/auth");
+
+// All activity routes — admin only
+router.use(verifyToken, requireRole("admin"));
 
 // GET /api/activity
 // Query params: email, role, action, from (ISO date), to (ISO date), limit

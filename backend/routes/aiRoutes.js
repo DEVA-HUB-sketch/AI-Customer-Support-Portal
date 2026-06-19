@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
+const { verifyToken } = require("../middleware/auth");
 const {
   geminiChat,
   geminiSentiment,
@@ -10,14 +11,17 @@ const {
   geminiFaqSearch
 } = require("../services/geminiService");
 
+// All AI routes require a valid session
+router.use(verifyToken);
+
 // POST /api/ai/chat
 // Gemini-powered chatbot with persistent history in Firestore
 router.post("/chat", async (req, res) => {
   try {
-    const { message, email, history = [], sessionId } = req.body;
+    const { message, email, history = [], sessionId, lang = "en-US" } = req.body;
     if (!message) return res.status(400).json({ message: "message is required" });
 
-    const result = await geminiChat(message, history);
+    const result = await geminiChat(message, history, lang);
 
     // Persist conversation to Firestore
     if (email) {
@@ -161,6 +165,161 @@ router.get("/history/:sessionId", async (req, res) => {
     const doc = await db.collection("ai_conversations").doc(req.params.sessionId).get();
     if (!doc.exists) return res.status(404).json({ message: "Session not found" });
     res.json(doc.data());
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/ai/translate — Feature 4
+router.post("/translate", async (req, res) => {
+  try {
+    const { text, targetLang, sourceLang = "auto" } = req.body;
+    if (!text || !targetLang) return res.status(400).json({ message: "text and targetLang required" });
+    const { geminiTranslate } = require("../services/geminiService");
+    const result = await geminiTranslate(text, targetLang, sourceLang);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/ai/quality-score — Feature 10
+router.post("/quality-score", async (req, res) => {
+  try {
+    const { response, context } = req.body;
+    if (!response) return res.status(400).json({ message: "response required" });
+    const { geminiEvaluateQuality } = require("../services/geminiService");
+    const result = await geminiEvaluateQuality(response, context || {});
+
+    // Store for admin review
+    await db.collection("quality_scores").add({
+      response: response.substring(0, 500),
+      context,
+      ...result,
+      scoredBy: req.user.email,
+      scoredAt: new Date().toISOString()
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/ai/weekly-report — Feature 20
+router.get("/weekly-report", async (req, res) => {
+  try {
+    const { requireRole } = require("../middleware/auth");
+    if (!["admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Admin only" });
+    }
+    const { generateWeeklyReport } = require("../services/ticketAI");
+    const report = await generateWeeklyReport();
+
+    // Cache report in Firestore
+    await db.collection("weekly_reports").add({
+      ...report,
+      requestedBy: req.user.email
+    });
+
+    res.json(report);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/ai/weekly-reports — list past reports
+router.get("/weekly-reports", async (req, res) => {
+  try {
+    if (req.user.role !== "admin") return res.status(403).json({ message: "Admin only" });
+    const snap = await db.collection("weekly_reports").get();
+    const reports = [];
+    snap.forEach(doc => reports.push({ id: doc.id, generatedAt: doc.data().generatedAt, weekStart: doc.data().weekStart }));
+    reports.sort((a, b) => (b.generatedAt || "").localeCompare(a.generatedAt || ""));
+    res.json({ reports: reports.slice(0, 20) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/ai/meeting-request — Feature 13
+router.post("/meeting-request", async (req, res) => {
+  try {
+    const { customerEmail, reason, preferredDates, ticketId } = req.body;
+    if (!customerEmail || !preferredDates?.length) {
+      return res.status(400).json({ message: "customerEmail and preferredDates required" });
+    }
+    const emailLower = customerEmail.toLowerCase();
+
+    // Find available agents
+    const availSnap = await db.collection("agent_availability")
+      .where("status", "==", "online")
+      .get();
+    const availAgents = [];
+    availSnap.forEach(doc => availAgents.push(doc.data().email));
+
+    // Create meeting request
+    const ref = await db.collection("meeting_requests").add({
+      customerEmail: emailLower,
+      requestedBy:   req.user.email,
+      reason:        reason || "",
+      ticketId:      ticketId || null,
+      preferredDates,
+      availAgents,
+      status:        "pending",
+      scheduledAt:   null,
+      assignedAgent: null,
+      createdAt:     new Date().toISOString()
+    });
+
+    res.status(201).json({
+      id: ref.id,
+      message: "Meeting request submitted. An agent will confirm shortly.",
+      availAgents: availAgents.length
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/ai/meeting-request/:id/schedule — agent schedules a meeting
+router.put("/meeting-request/:id/schedule", async (req, res) => {
+  try {
+    if (!["agent", "admin"].includes(req.user.role)) return res.status(403).json({ message: "Agent/Admin only" });
+    const { scheduledAt, meetingLink } = req.body;
+    if (!scheduledAt) return res.status(400).json({ message: "scheduledAt required" });
+
+    const ref = db.collection("meeting_requests").doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ message: "Meeting request not found" });
+
+    await ref.update({
+      status:        "scheduled",
+      scheduledAt,
+      assignedAgent: req.user.email,
+      meetingLink:   meetingLink || null,
+      updatedAt:     new Date().toISOString()
+    });
+
+    res.json({ message: "Meeting scheduled successfully", scheduledAt, agent: req.user.email });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/ai/meeting-requests — list meeting requests
+router.get("/meeting-requests", async (req, res) => {
+  try {
+    let snap;
+    if (req.user.role === "customer") {
+      snap = await db.collection("meeting_requests").where("customerEmail", "==", req.user.email).get();
+    } else {
+      snap = await db.collection("meeting_requests").get();
+    }
+    const requests = [];
+    snap.forEach(doc => requests.push({ id: doc.id, ...doc.data() }));
+    requests.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    res.json({ requests });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
