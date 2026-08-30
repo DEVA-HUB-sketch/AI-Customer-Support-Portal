@@ -977,7 +977,7 @@ header{
 const _u = JSON.parse(localStorage.getItem("deskflow_user") || "null");
 if (!_u) { location.href = "signin.html"; }
 const USER = _u || {};
-const API = "";
+const API = "http://localhost:5000";
 
 (function patchFetch() {
   const _orig = window.fetch;
